@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+.venv/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Environment Variables
+.env
+
+# Logs
+*.log
+
+# NOVAX-AI personal memory
+data/memory.json
