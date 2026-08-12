@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from src.brain import Brain
 
 
-HTML_PAGE = """
+HTML_PAGE = r"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,18 +28,22 @@ HTML_PAGE = """
     }
 
     * { box-sizing: border-box; }
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: radial-gradient(circle at top left, rgba(6, 182, 212, 0.15), transparent 30%), var(--bg);
       color: var(--text);
-      min-height: 100vh;
     }
 
     .app-shell {
       display: grid;
       grid-template-columns: 320px 1fr;
-      min-height: 100vh;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
     }
 
     .sidebar {
@@ -49,6 +53,8 @@ HTML_PAGE = """
       display: flex;
       flex-direction: column;
       gap: 18px;
+      height: 100vh;
+      overflow-y: auto;
     }
 
     .brand {
@@ -109,15 +115,20 @@ HTML_PAGE = """
     .chat-panel {
       display: flex;
       flex-direction: column;
-      padding: 24px;
-      gap: 16px;
+      padding: 20px;
+      gap: 14px;
+      height: 100vh;
+      min-height: 0;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .chat-header {
+      flex-shrink: 0;
       background: rgba(17,24,39,0.9);
       border: 1px solid rgba(148,163,184,0.16);
       border-radius: 20px;
-      padding: 16px 18px;
+      padding: 14px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -134,6 +145,7 @@ HTML_PAGE = """
       border-radius: 24px;
       padding: 18px;
       overflow-y: auto;
+      scroll-behavior: smooth;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -165,7 +177,19 @@ HTML_PAGE = """
       border: 1px solid rgba(148,163,184,0.15);
     }
 
+    .bubble a {
+      color: #38bdf8;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-weight: 500;
+      word-break: break-all;
+    }
+    .bubble a:hover {
+      color: #7dd3fc;
+    }
+
     .composer {
+      flex-shrink: 0;
       display: flex;
       gap: 10px;
       padding: 14px;
@@ -268,12 +292,48 @@ HTML_PAGE = """
     const form = document.getElementById('chat-form');
     const input = document.getElementById('message-input');
 
+    function formatMarkdown(text) {
+      if (!text) return '';
+      // Escape basic HTML
+      let html = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Convert Markdown links: [Link Text](https://...)
+      html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, function(match, label, url) {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+      });
+
+      // Convert raw unformatted URLs into clickable links: https://...
+      html = html.replace(/(^|[^"'>])(https?:\/\/[^\s<)]+)/g, function(match, prefix, url) {
+        return `${prefix}<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      });
+
+      // Line breaks
+      html = html.replace(/\n/g, '<br>');
+      return html;
+    }
+
+    function scrollToBottom() {
+      requestAnimationFrame(() => {
+        messages.scrollTo({
+          top: messages.scrollHeight,
+          behavior: 'smooth'
+        });
+      });
+    }
+
     function appendBubble(role, text) {
       const bubble = document.createElement('div');
       bubble.className = `bubble ${role}`;
-      bubble.textContent = text;
+      if (role === 'ai') {
+        bubble.innerHTML = formatMarkdown(text);
+      } else {
+        bubble.textContent = text;
+      }
       messages.appendChild(bubble);
-      messages.scrollTop = messages.scrollHeight;
+      scrollToBottom();
     }
 
     function showTyping() {
@@ -282,40 +342,40 @@ HTML_PAGE = """
       typing.className = 'typing';
       typing.textContent = 'NOVAX is thinking...';
       messages.appendChild(typing);
-      messages.scrollTop = messages.scrollHeight;
+      scrollToBottom();
     }
 
     function hideTyping() {
       const typing = document.getElementById('typing');
       if (typing) typing.remove();
+      scrollToBottom();
     }
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
+        appendBubble('user', text);
+        input.value = '';
+        showTyping();
 
-      appendBubble('user', text);
-      input.value = '';
-      showTyping();
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+          });
 
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text })
-        });
-
-        const data = await response.json();
-        hideTyping();
-        appendBubble('ai', data.reply || 'No reply returned.');
-      } catch (error) {
-        hideTyping();
-        appendBubble('ai', 'Sorry, I could not reach the assistant right now.');
-      }
-    });
-  </script>
-</body>
+          const data = await response.json();
+          hideTyping();
+          appendBubble('ai', data.reply || 'No reply returned.');
+        } catch (error) {
+          hideTyping();
+          appendBubble('ai', 'Sorry, I could not reach the assistant right now.');
+        }
+      });
+    </script>
+  </body>
 </html>
 """
 
