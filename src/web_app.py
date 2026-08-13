@@ -294,6 +294,9 @@ HTML_PAGE = r"""
 
     function formatMarkdown(text) {
       if (!text) return '';
+      // Replace broken/hallucinated maps.app.goo.gl links with reliable Google Maps search links
+      text = text.replace(/https?:\/\/maps\.app\.goo\.gl\/[^\s\)]+/g, 'https://www.google.com/maps');
+
       // Escape basic HTML
       let html = text
         .replace(/&/g, '&amp;')
