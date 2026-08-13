@@ -2,6 +2,7 @@ from src.ai_model import AIModel
 from src.conversation import Conversation
 from src.memory import MemoryManager
 from src.intent import IntentManager
+from src.search_engine import SearchEngine
 
 
 class Brain:
@@ -10,6 +11,7 @@ class Brain:
         self.ai = AIModel()
         self.conversation = Conversation()
         self.memory = MemoryManager()
+        self.search_engine = SearchEngine()
 
         # Create the Intent Manager
         self.intent = IntentManager(self)
@@ -36,6 +38,47 @@ class Brain:
 
         tabular_requested = any(kw in lower for kw in tabular_requests)
 
+        # Live Web Search & Real-Time News enrichment
+        search_context_message = None
+        is_news_query = any(kw in lower for kw in ["news", "latest", "update", "updates", "current events", "what happened", "today news"])
+        
+        if is_news_query:
+            news_data = self.search_engine.fetch_live_news(user_message)
+            if news_data:
+                search_context_message = {
+                    "role": "system",
+                    "content": (
+                        f"[Live Real-Time News Feed - Just In]\n"
+                        f"{news_data}\n\n"
+                        f"Instructions: You HAVE full access to live real-time news. Use the live headlines and timestamps above to summarize and answer the user's request about the latest news clearly and accurately. Never claim you don't have access to current news."
+                    )
+                }
+        else:
+            should_search = any(
+                word in lower for word in [
+                    "who is", "who was", "what is", "where is", "tell me about",
+                    "cm", "minister", "actor", "president", "chief minister", "details of", "information", "vijay"
+                ]
+            )
+
+            if should_search:
+                search_results = self.search_engine.search_wikipedia(user_message)
+                if search_results:
+                    primary = search_results[0]
+                    search_context_message = {
+                        "role": "system",
+                        "content": (
+                            f"[Verified Live Information]\n"
+                            f"Title: {primary.get('title')}\n"
+                            f"Fact Summary: {primary.get('extract')}\n\n"
+                            f"Instructions: Use the verified live information above to provide 100% accurate details in plain text. Do not include any images or photo tags."
+                        )
+                    }
+
+        messages_to_send = self.conversation.get_messages()
+        if search_context_message:
+            messages_to_send = [search_context_message] + messages_to_send
+
         if tabular_requested:
             # Insert a system-level formatting hint so the model returns a Markdown table
             messages = [
@@ -48,13 +91,11 @@ class Brain:
                         "Do not include any extra explanatory text outside the fenced table."
                     )
                 }
-            ] + self.conversation.get_messages()
+            ] + messages_to_send
 
             response = self.ai.ask(messages)
         else:
-            response = self.ai.ask(
-                self.conversation.get_messages()
-            )
+            response = self.ai.ask(messages_to_send)
 
         # If the user requested a tabular output but the model returned plain text
         # (no fenced markdown table), ask the model to strictly convert the reply
