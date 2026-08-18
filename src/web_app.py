@@ -657,13 +657,6 @@ HTML_PAGE = r"""
       </section>
 
       <div class="chat-bottom">
-        <div class="suggested-prompts">
-          <button class="suggestion-chip" onclick="sendSuggested('Explain quantum computing')">Explain quantum computing</button>
-          <button class="suggestion-chip" onclick="sendSuggested('Help me with Python')">Help me with Python</button>
-          <button class="suggestion-chip" onclick="sendSuggested('Summarize this idea')">Summarize this idea</button>
-          <button class="suggestion-chip" onclick="sendSuggested('Write some code')">Write some code</button>
-        </div>
-
         <form class="composer" id="chat-form">
           <input id="message-input" placeholder="Ask NOVAX anything..." autocomplete="off" />
           <button type="submit" class="send-btn" title="Send message">
