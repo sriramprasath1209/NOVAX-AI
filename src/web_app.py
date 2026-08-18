@@ -89,17 +89,23 @@ HTML_PAGE = r"""
     }
 
     .brand-logo {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--novax-primary), var(--novax-secondary));
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(13, 18, 32, 0.85);
       display: grid;
       place-items: center;
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: #ffffff;
-      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      overflow: hidden;
+      padding: 3px;
+      flex-shrink: 0;
+    }
+
+    .brand-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     .brand-info {
@@ -302,6 +308,38 @@ HTML_PAGE = r"""
       margin-top: 1px;
     }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .top-right-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 8px;
+      border-radius: 12px;
+      background: rgba(17, 24, 39, 0.85);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      box-shadow: 0 0 14px rgba(99, 102, 241, 0.25);
+    }
+
+    .header-logo-img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+
+    .header-logo-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      background: linear-gradient(135deg, #F8FAFC, var(--novax-primary-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
     .header-badge {
       display: flex;
       align-items: center;
@@ -381,11 +419,27 @@ HTML_PAGE = r"""
       margin-top: 4px;
     }
 
+    .welcome-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 18px rgba(99, 102, 241, 0.5));
+    }
+
     .message-row.ai .msg-avatar {
-      background: linear-gradient(135deg, var(--novax-primary), var(--novax-secondary));
+      background: rgba(13, 18, 32, 0.95);
       color: #ffffff;
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      padding: 3px;
+      overflow: hidden;
+    }
+
+    .ai-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
     }
 
     .message-row.user .msg-avatar {
@@ -584,7 +638,9 @@ HTML_PAGE = r"""
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-logo">N</div>
+        <div class="brand-logo">
+          <img src="/assets/logo.svg" alt="NOVAX Logo" class="brand-logo-img" />
+        </div>
         <div class="brand-info">
           <span class="brand-title">NOVAX</span>
           <span class="brand-subtitle">AI PERSONAL AGENT</span>
@@ -642,16 +698,23 @@ HTML_PAGE = r"""
             <div class="header-status">Deep Space v2.0 • Online • Memory Active</div>
           </div>
         </div>
-        <div class="header-badge">● Ready</div>
+        <div class="header-right">
+          <div class="top-right-logo">
+            <img src="/assets/logo.svg" alt="NOVAX AI" class="header-logo-img" />
+            <span class="header-logo-text">NOVAX-AI</span>
+          </div>
+          <div class="header-badge">● Ready</div>
+        </div>
       </header>
 
       <section class="messages" id="messages">
         <div class="welcome-card">
+          <img src="/assets/logo.svg" alt="NOVAX AI" class="welcome-logo" />
           <h1 class="welcome-heading">Welcome to NOVAX</h1>
           <p class="welcome-subtitle">Your AI assistant is ready to help you.</p>
         </div>
         <div class="message-row ai">
-          <div class="msg-avatar">N</div>
+          <div class="msg-avatar"><img src="/assets/logo.svg" alt="NOVAX AI" class="ai-avatar-img" /></div>
           <div class="bubble ai">Hello! I’m NOVAX-AI, your personal agent. How can I assist you today?</div>
         </div>
       </section>
@@ -734,7 +797,11 @@ HTML_PAGE = r"""
       
       const avatar = document.createElement('div');
       avatar.className = 'msg-avatar';
-      avatar.textContent = role === 'ai' ? 'N' : 'S';
+      if (role === 'ai') {
+        avatar.innerHTML = '<img src="/assets/logo.svg" alt="NOVAX AI" class="ai-avatar-img" />';
+      } else {
+        avatar.textContent = 'S';
+      }
 
       const bubble = document.createElement('div');
       bubble.className = `bubble ${role}`;
@@ -807,6 +874,17 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
         if parsed.path == "/":
             self._send_html(HTML_PAGE)
             return
+        elif parsed.path == "/assets/logo.svg":
+            asset_path = os.path.join(os.path.dirname(__file__), "assets", "logo.svg")
+            if os.path.exists(asset_path):
+                with open(asset_path, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/svg+xml")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
 
         self._send_json({"error": "not found"}, status=404)
 
@@ -853,18 +931,39 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
 
 
 class NOVAXServer(ThreadingHTTPServer):
+    allow_reuse_address = True
+
     def __init__(self, server_address, handler_class):
         super().__init__(server_address, handler_class)
         self.brain = Brain()
 
 
 def run_server(host="127.0.0.1", port=None):
-    port = port or int(os.environ.get("PORT", "8000"))
-    server = NOVAXServer((host, port), NOVAXRequestHandler)
-    print(f"NOVAX web server running at http://{host}:{port}")
+    initial_port = port or int(os.environ.get("PORT", "8000"))
+    max_tries = 10
+    server = None
+    actual_port = initial_port
+
+    for i in range(max_tries):
+        current_port = initial_port + i
+        try:
+            server = NOVAXServer((host, current_port), NOVAXRequestHandler)
+            actual_port = current_port
+            break
+        except OSError as e:
+            if e.errno == 48 and port is None:  # Address already in use
+                continue
+            raise e
+
+    if not server:
+        print(f"Could not bind to any port starting from {initial_port}.")
+        return
+
+    print(f"NOVAX web server running at http://{host}:{actual_port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nShutting down NOVAX server...")
     finally:
         server.server_close()
+
