@@ -6,17 +6,16 @@ from urllib.parse import urlparse
 from src.brain import Brain
 
 
-HTML_PAGE = r"""
-<!DOCTYPE html>
+HTML_PAGE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="referrer" content="no-referrer" />
-  <title>NOVAX AI - Deep Space</title>
+  <title>NOVAX-AI — Deep Space Command Center</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --novax-bg: #080B14;
@@ -24,6 +23,7 @@ HTML_PAGE = r"""
       --novax-surface: #111827;
       --novax-surface-secondary: #151C2B;
       --novax-border: #1E293B;
+      --novax-border-light: rgba(255, 255, 255, 0.08);
       --novax-primary: #6366F1;
       --novax-primary-hover: #818CF8;
       --novax-primary-active: #4F46E5;
@@ -37,7 +37,7 @@ HTML_PAGE = r"""
       --novax-error: #EF4444;
       --novax-bubble-user: #1A1733;
       --novax-bubble-user-border: rgba(99, 102, 241, 0.30);
-      --novax-nav-active-bg: rgba(99, 102, 241, 0.15);
+      --novax-nav-active-bg: rgba(99, 102, 241, 0.14);
       --novax-nav-active-border: rgba(99, 102, 241, 0.35);
       --novax-nav-active-icon: #818CF8;
     }
@@ -51,11 +51,12 @@ HTML_PAGE = r"""
       font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background-color: var(--novax-bg);
       background-image: 
-        radial-gradient(circle at 60% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.04) 0%, transparent 40%),
-        radial-gradient(rgba(248, 250, 252, 0.08) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 48px 48px;
+        radial-gradient(circle at 75% 15%, rgba(99, 102, 241, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 20% 85%, rgba(34, 211, 238, 0.05) 0%, transparent 40%),
+        radial-gradient(rgba(248, 250, 252, 0.05) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px;
       color: var(--novax-text);
+      -webkit-font-smoothing: antialiased;
     }
 
     .app-shell {
@@ -83,19 +84,19 @@ HTML_PAGE = r"""
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 8px 6px 20px 6px;
+      padding: 6px 4px 18px 4px;
       border-bottom: 1px solid rgba(30, 41, 59, 0.8);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .brand-logo {
       width: 42px;
       height: 42px;
       border-radius: 12px;
-      background: rgba(13, 18, 32, 0.85);
+      background: rgba(13, 18, 32, 0.9);
       display: grid;
       place-items: center;
-      box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
       border: 1px solid rgba(99, 102, 241, 0.35);
       overflow: hidden;
       padding: 3px;
@@ -114,35 +115,73 @@ HTML_PAGE = r"""
     }
 
     .brand-title {
-      font-weight: 700;
-      font-size: 1.05rem;
+      font-weight: 800;
+      font-size: 1.1rem;
       letter-spacing: 0.08em;
       color: var(--novax-text);
+      line-height: 1.2;
     }
 
     .brand-subtitle {
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
       color: var(--novax-muted);
-      margin-top: 1px;
+      margin-top: 2px;
     }
 
     /* Navigation */
-    .nav-section {
+    .new-chat-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--novax-primary), #4F46E5);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.92rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .new-chat-btn:hover {
+      background: linear-gradient(135deg, var(--novax-primary-hover), var(--novax-primary));
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .new-chat-btn:active {
+      transform: translateY(0);
+    }
+
+    .nav-group {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      flex: 1;
+      margin-bottom: 16px;
+    }
+
+    .nav-section-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--novax-disabled);
+      padding: 12px 12px 6px 12px;
+      text-transform: uppercase;
     }
 
     .nav-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-radius: 10px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 500;
       color: var(--novax-muted);
       background: transparent;
@@ -152,21 +191,18 @@ HTML_PAGE = r"""
       text-decoration: none;
     }
 
-    .nav-item svg {
-      width: 18px;
-      height: 18px;
-      stroke: var(--novax-disabled);
-      transition: stroke 0.18s ease;
-      flex-shrink: 0;
+    .nav-item-icon {
+      font-size: 1.05rem;
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      line-height: 1;
     }
 
     .nav-item:hover {
       background: rgba(99, 102, 241, 0.08);
       color: var(--novax-text);
-    }
-
-    .nav-item:hover svg {
-      stroke: var(--novax-primary-hover);
     }
 
     .nav-item.active {
@@ -176,75 +212,61 @@ HTML_PAGE = r"""
       font-weight: 600;
     }
 
-    .nav-item.active svg {
-      stroke: var(--novax-nav-active-icon);
-    }
-
-    .new-chat-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 11px 16px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--novax-primary), #4F46E5);
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      cursor: pointer;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
-      transition: all 0.2s ease;
-    }
-
-    .new-chat-btn:hover {
-      background: linear-gradient(135deg, var(--novax-primary-hover), var(--novax-primary));
-      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.38);
+    .nav-item.active .nav-item-icon {
+      color: var(--novax-cyan);
     }
 
     /* User Profile */
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 12px;
+    }
+
     .user-profile {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 14px;
-      border-top: 1px solid var(--novax-border);
-      margin-top: 16px;
-      background: rgba(17, 24, 39, 0.5);
+      padding: 10px 12px;
+      border: 1px solid var(--novax-border);
+      background: rgba(17, 24, 39, 0.6);
       border-radius: 12px;
     }
 
     .avatar {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: var(--novax-surface-secondary);
-      border: 1px solid var(--novax-border);
+      border: 1.5px solid var(--novax-cyan);
       display: grid;
       place-items: center;
-      font-weight: 600;
-      font-size: 0.88rem;
+      font-weight: 700;
+      font-size: 0.9rem;
       color: var(--novax-cyan);
+      box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
     }
 
     .user-info {
       display: flex;
       flex-direction: column;
       flex: 1;
+      overflow: hidden;
     }
 
     .user-name {
       font-size: 0.88rem;
       font-weight: 600;
       color: var(--novax-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .user-status {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       color: var(--novax-muted);
     }
 
@@ -256,8 +278,8 @@ HTML_PAGE = r"""
       box-shadow: 0 0 6px var(--novax-success);
     }
 
-    /* Main Chat Panel */
-    .chat-panel {
+    /* Main Container */
+    .main-container {
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -267,11 +289,11 @@ HTML_PAGE = r"""
     }
 
     /* Header */
-    .chat-header {
+    .main-header {
       flex-shrink: 0;
-      background: rgba(13, 18, 32, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(13, 18, 32, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--novax-border);
       padding: 14px 24px;
       display: flex;
@@ -283,7 +305,7 @@ HTML_PAGE = r"""
     .header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .mobile-menu-btn {
@@ -291,19 +313,25 @@ HTML_PAGE = r"""
       background: transparent;
       border: 1px solid var(--novax-border);
       color: var(--novax-text);
-      padding: 6px;
+      padding: 8px;
       border-radius: 8px;
       cursor: pointer;
     }
 
+    .header-title-container {
+      display: flex;
+      flex-direction: column;
+    }
+
     .header-title {
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 1.05rem;
+      font-weight: 700;
       color: var(--novax-text);
+      letter-spacing: -0.01em;
     }
 
     .header-status {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--novax-muted);
       margin-top: 1px;
     }
@@ -320,14 +348,14 @@ HTML_PAGE = r"""
       gap: 8px;
       padding: 5px 12px 5px 8px;
       border-radius: 12px;
-      background: rgba(17, 24, 39, 0.85);
-      border: 1px solid rgba(99, 102, 241, 0.35);
-      box-shadow: 0 0 14px rgba(99, 102, 241, 0.25);
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
     }
 
     .header-logo-img {
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       object-fit: contain;
     }
 
@@ -353,8 +381,27 @@ HTML_PAGE = r"""
       font-weight: 600;
     }
 
-    /* Messages List */
-    .messages {
+    /* Views Framework */
+    .view-content {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .view-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* CHAT VIEW */
+    #view-chat {
+      padding: 0;
+    }
+
+    .messages-scroll {
       flex: 1;
       padding: 24px;
       overflow-y: auto;
@@ -363,7 +410,7 @@ HTML_PAGE = r"""
       flex-direction: column;
       gap: 18px;
       min-height: 0;
-      max-width: 960px;
+      max-width: 920px;
       width: 100%;
       margin: 0 auto;
     }
@@ -371,13 +418,21 @@ HTML_PAGE = r"""
     /* Welcome Hero Card */
     .welcome-card {
       text-align: center;
-      padding: 40px 20px 20px 20px;
+      padding: 32px 20px 20px 20px;
       margin-bottom: 10px;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .welcome-logo {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.45));
     }
 
     .welcome-heading {
       font-size: 1.8rem;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: -0.02em;
       margin: 0 0 8px 0;
       background: linear-gradient(135deg, var(--novax-text) 30%, var(--novax-primary-hover) 70%, var(--novax-cyan) 100%);
@@ -388,14 +443,64 @@ HTML_PAGE = r"""
     .welcome-subtitle {
       font-size: 0.95rem;
       color: var(--novax-muted);
-      margin: 0;
+      margin: 0 0 24px 0;
+    }
+
+    .suggestion-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .suggestion-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      padding: 14px 16px;
+      border-radius: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .suggestion-card:hover {
+      border-color: var(--novax-primary);
+      background: rgba(17, 24, 39, 0.9);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    .suggestion-icon {
+      font-size: 1.1rem;
+      margin-bottom: 2px;
+    }
+
+    .suggestion-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--novax-text);
+    }
+
+    .suggestion-desc {
+      font-size: 0.76rem;
+      color: var(--novax-muted);
     }
 
     /* Message Bubbles */
     .message-row {
       display: flex;
       gap: 12px;
-      max-width: 85%;
+      max-width: 86%;
+      animation: messageSlide 0.25s ease-out;
+    }
+
+    @keyframes messageSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .message-row.user {
@@ -419,13 +524,6 @@ HTML_PAGE = r"""
       margin-top: 4px;
     }
 
-    .welcome-logo {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 16px;
-      filter: drop-shadow(0 0 18px rgba(99, 102, 241, 0.5));
-    }
-
     .message-row.ai .msg-avatar {
       background: rgba(13, 18, 32, 0.95);
       color: #ffffff;
@@ -444,7 +542,7 @@ HTML_PAGE = r"""
 
     .message-row.user .msg-avatar {
       background: var(--novax-surface-secondary);
-      border: 1px solid var(--novax-border);
+      border: 1px solid var(--novax-cyan);
       color: var(--novax-cyan);
     }
 
@@ -452,7 +550,7 @@ HTML_PAGE = r"""
       padding: 13px 16px;
       border-radius: 14px;
       line-height: 1.55;
-      font-size: 0.94rem;
+      font-size: 0.93rem;
       word-break: break-word;
       position: relative;
     }
@@ -471,32 +569,45 @@ HTML_PAGE = r"""
       border-top-left-radius: 4px;
     }
 
-    .bubble a {
-      color: var(--novax-cyan);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      font-weight: 500;
-    }
-
-    .bubble a:hover {
-      color: var(--novax-primary-hover);
-    }
-
-    .bubble img.chat-img {
-      max-width: 100%;
-      max-height: 300px;
-      border-radius: 12px;
+    .bubble table {
+      border-collapse: collapse;
+      width: 100%;
       margin: 10px 0;
-      display: block;
-      object-fit: cover;
-      border: 1px solid var(--novax-border);
-      cursor: pointer;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-      transition: transform 0.2s ease;
+      font-size: 0.85rem;
     }
 
-    .bubble img.chat-img:hover {
-      transform: scale(1.01);
+    .bubble th, .bubble td {
+      border: 1px solid var(--novax-border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    .bubble th {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--novax-cyan);
+    }
+
+    .bubble code {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85em;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .bubble pre {
+      background: #0A0E1A;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid var(--novax-border);
+    }
+
+    .bubble pre code {
+      background: transparent;
+      padding: 0;
+      border: none;
     }
 
     .typing-indicator {
@@ -508,46 +619,34 @@ HTML_PAGE = r"""
       border: 1px solid var(--novax-border);
       border-radius: 12px;
       align-self: flex-start;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    /* Bottom Input Section */
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--novax-primary-hover);
+      animation: pulse 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Composer */
     .chat-bottom {
       flex-shrink: 0;
       padding: 14px 24px 20px 24px;
-      max-width: 960px;
+      max-width: 920px;
       width: 100%;
       margin: 0 auto;
       box-sizing: border-box;
     }
 
-    /* Suggested Prompts Chips */
-    .suggested-prompts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .suggestion-chip {
-      padding: 7px 13px;
-      border-radius: 999px;
-      background: rgba(17, 24, 39, 0.7);
-      border: 1px solid var(--novax-border);
-      color: var(--novax-muted);
-      font-size: 0.82rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .suggestion-chip:hover {
-      background: rgba(99, 102, 241, 0.12);
-      border-color: var(--novax-primary-hover);
-      color: var(--novax-text);
-      transform: translateY(-1px);
-    }
-
-    /* Floating Composer Form */
     .composer {
       display: flex;
       align-items: center;
@@ -597,10 +696,6 @@ HTML_PAGE = r"""
       background: var(--novax-primary-hover);
     }
 
-    .send-btn:active {
-      background: var(--novax-primary-active);
-    }
-
     .send-btn svg {
       width: 18px;
       height: 18px;
@@ -611,7 +706,511 @@ HTML_PAGE = r"""
       stroke-linejoin: round;
     }
 
-    /* Responsive */
+    /* MODULE VIEWS STYLING */
+    .module-container {
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .module-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--novax-border);
+    }
+
+    .module-title-box h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 0 0 4px 0;
+      color: var(--novax-text);
+    }
+
+    .module-title-box p {
+      font-size: 0.85rem;
+      color: var(--novax-muted);
+      margin: 0;
+    }
+
+    .btn-action {
+      padding: 9px 16px;
+      border-radius: 8px;
+      background: var(--novax-primary);
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.18s ease;
+    }
+
+    .btn-action:hover {
+      background: var(--novax-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--novax-surface-secondary);
+      border: 1px solid var(--novax-border);
+      color: var(--novax-text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--novax-primary-hover);
+    }
+
+    /* MEMORY CARDS */
+    .memory-notice {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.84rem;
+      color: var(--novax-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .memory-category-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .memory-cat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--novax-border);
+      padding-bottom: 8px;
+    }
+
+    .memory-cat-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--novax-cyan);
+      text-transform: uppercase;
+    }
+
+    .memory-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--novax-surface-secondary);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--novax-border);
+    }
+
+    .memory-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .memory-key {
+      font-size: 0.75rem;
+      color: var(--novax-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .memory-val {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--novax-text);
+    }
+
+    .memory-del-btn {
+      background: transparent;
+      border: 0;
+      color: var(--novax-disabled);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.18s ease;
+    }
+
+    .memory-del-btn:hover {
+      color: var(--novax-error);
+    }
+
+    /* Form Modal / Inline */
+    .memory-form-box {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 160px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--novax-muted);
+    }
+
+    .form-group input, .form-group select {
+      background: var(--novax-surface-secondary);
+      border: 1px solid var(--novax-border);
+      color: var(--novax-text);
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--novax-primary);
+    }
+
+    /* PROJECTS VIEW */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 16px;
+    }
+
+    .project-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .project-card:hover {
+      border-color: var(--novax-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .project-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .project-icon {
+      font-size: 1.5rem;
+      width: 44px;
+      height: 44px;
+      background: var(--novax-surface-secondary);
+      border: 1px solid var(--novax-border);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+    }
+
+    .project-status-badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--novax-primary-hover);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .project-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--novax-text);
+      margin: 0;
+    }
+
+    .project-desc {
+      font-size: 0.85rem;
+      color: var(--novax-muted);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .project-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--novax-disabled);
+      padding-top: 10px;
+      border-top: 1px solid var(--novax-border);
+    }
+
+    /* TOOLS VIEW */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .tool-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tool-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tool-icon {
+      font-size: 1.4rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      display: grid;
+      place-items: center;
+    }
+
+    .tool-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--novax-text);
+    }
+
+    .tool-status {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .tool-status.available {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--novax-success);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .tool-status.ready {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--novax-cyan);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+
+    .tool-status.soon {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--novax-disabled);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .tool-desc {
+      font-size: 0.84rem;
+      color: var(--novax-muted);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    /* TASKS VIEW */
+    .tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      padding: 12px 16px;
+      border-radius: 10px;
+      transition: border-color 0.18s ease;
+    }
+
+    .task-item:hover {
+      border-color: var(--novax-primary-hover);
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid var(--novax-primary);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      color: transparent;
+    }
+
+    .task-checkbox.checked {
+      background: var(--novax-primary);
+      color: white;
+    }
+
+    .task-text {
+      font-size: 0.9rem;
+      color: var(--novax-text);
+      flex: 1;
+    }
+
+    .task-text.completed {
+      text-decoration: line-through;
+      color: var(--novax-disabled);
+    }
+
+    .task-tag {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--novax-surface-secondary);
+      color: var(--novax-muted);
+      border: 1px solid var(--novax-border);
+    }
+
+    /* AUTOMATIONS VIEW */
+    .automation-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .automation-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .automation-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .automation-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--novax-text);
+    }
+
+    .toggle-switch {
+      width: 38px;
+      height: 20px;
+      background: var(--novax-surface-secondary);
+      border: 1px solid var(--novax-border);
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--novax-primary);
+      border-color: var(--novax-primary);
+    }
+
+    .toggle-knob {
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s ease;
+    }
+
+    .toggle-switch.active .toggle-knob {
+      transform: translateX(18px);
+    }
+
+    .automation-schedule {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--novax-cyan);
+    }
+
+    /* SETTINGS VIEW */
+    .settings-group {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .settings-group-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--novax-text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--novax-border);
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .setting-label {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--novax-text);
+    }
+
+    .setting-desc {
+      font-size: 0.78rem;
+      color: var(--novax-muted);
+      margin-top: 2px;
+    }
+
+    /* RESPONSIVE */
     @media (max-width: 768px) {
       .app-shell {
         grid-template-columns: 1fr;
@@ -635,7 +1234,7 @@ HTML_PAGE = r"""
 </head>
 <body>
   <div class="app-shell">
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-logo">
@@ -647,86 +1246,525 @@ HTML_PAGE = r"""
         </div>
       </div>
 
-      <button class="new-chat-btn" onclick="clearMessages()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-        New Chat
+      <button class="new-chat-btn" onclick="startNewChat()">
+        <span>＋</span> New Chat
       </button>
 
-      <nav class="nav-section">
-        <a class="nav-item active" href="#">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Conversations
+      <nav class="nav-group">
+        <a class="nav-item active" onclick="switchView('chat', this)">
+          <span class="nav-item-icon">💬</span>
+          <span>Chat</span>
         </a>
-        <a class="nav-item" href="#">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          Memory
+        <a class="nav-item" onclick="switchView('conversations', this)">
+          <span class="nav-item-icon">◉</span>
+          <span>Conversations</span>
         </a>
-        <a class="nav-item" href="#">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          Projects
+        <a class="nav-item" onclick="switchView('memory', this)">
+          <span class="nav-item-icon">🧠</span>
+          <span>Memory</span>
         </a>
-        <a class="nav-item" href="#">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-          Tools
+        <a class="nav-item" onclick="switchView('projects', this)">
+          <span class="nav-item-icon">📁</span>
+          <span>Projects</span>
         </a>
-        <a class="nav-item" href="#">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Settings
+
+        <div class="nav-section-title">AGENT</div>
+
+        <a class="nav-item" onclick="switchView('tools', this)">
+          <span class="nav-item-icon">🛠</span>
+          <span>Tools</span>
+        </a>
+        <a class="nav-item" onclick="switchView('tasks', this)">
+          <span class="nav-item-icon">📋</span>
+          <span>Tasks</span>
+        </a>
+        <a class="nav-item" onclick="switchView('automations', this)">
+          <span class="nav-item-icon">🔔</span>
+          <span>Automations</span>
+        </a>
+
+        <div class="nav-section-title">SYSTEM</div>
+
+        <a class="nav-item" onclick="switchView('settings', this)">
+          <span class="nav-item-icon">⚙</span>
+          <span>Settings</span>
         </a>
       </nav>
 
-      <div class="user-profile">
-        <div class="avatar">S</div>
-        <div class="user-info">
-          <span class="user-name">Sriram</span>
-          <span class="user-status">
-            <span class="status-dot"></span> Online
-          </span>
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar">S</div>
+          <div class="user-info">
+            <span class="user-name">Sriram</span>
+            <span class="user-status">
+              <span class="status-dot"></span> Online
+            </span>
+          </div>
         </div>
       </div>
     </aside>
 
-    <!-- Main Chat Panel -->
-    <main class="chat-panel">
-      <header class="chat-header">
+    <!-- MAIN CONTENT -->
+    <main class="main-container">
+      <!-- HEADER -->
+      <header class="main-header">
         <div class="header-left">
           <button class="mobile-menu-btn" onclick="toggleSidebar()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
           </button>
-          <div>
-            <div class="header-title">NOVAX Intelligence</div>
-            <div class="header-status">Deep Space v2.0 • Online • Memory Active</div>
+          <div class="header-title-container">
+            <div class="header-title" id="header-title-text">NOVAX Intelligence</div>
+            <div class="header-status" id="header-subtitle-text">Deep Space v2.0 • Ready • Personal Agent Active</div>
           </div>
         </div>
         <div class="header-right">
           <div class="top-right-logo">
-            <img src="/assets/logo.svg" alt="NOVAX AI" class="header-logo-img" />
+            <img src="/assets/logo.svg" alt="NOVAX Logo" class="header-logo-img" />
             <span class="header-logo-text">NOVAX-AI</span>
           </div>
-          <div class="header-badge">● Ready</div>
+          <div class="header-badge" id="ai-status-badge">● Ready</div>
         </div>
       </header>
 
-      <section class="messages" id="messages">
-        <div class="welcome-card">
-          <img src="/assets/logo.svg" alt="NOVAX AI" class="welcome-logo" />
-          <h1 class="welcome-heading">Welcome to NOVAX</h1>
-          <p class="welcome-subtitle">Your AI assistant is ready to help you.</p>
+      <!-- VIEW 1: CHAT -->
+      <section class="view-content active" id="view-chat">
+        <div class="messages-scroll" id="messages">
+          <div class="welcome-card" id="welcome-hero">
+            <img src="/assets/logo.svg" alt="NOVAX AI" class="welcome-logo" />
+            <h1 class="welcome-heading">Welcome to NOVAX</h1>
+            <p class="welcome-subtitle">Your intelligent personal agent for reasoning, memory, and automated workflows.</p>
+
+            <div class="suggestion-grid">
+              <div class="suggestion-card" onclick="sendPrompt('Explain Quantum Computing in simple terms')">
+                <span class="suggestion-icon">💡</span>
+                <span class="suggestion-title">Explain something to me</span>
+                <span class="suggestion-desc">Quantum Computing explained simply</span>
+              </div>
+              <div class="suggestion-card" onclick="sendPrompt('Write a Python script for web scraping')">
+                <span class="suggestion-icon">💻</span>
+                <span class="suggestion-title">Help me write code</span>
+                <span class="suggestion-desc">Python web scraper implementation</span>
+              </div>
+              <div class="suggestion-card" onclick="sendPrompt('Compare Python vs Rust for system programming')">
+                <span class="suggestion-icon">📊</span>
+                <span class="suggestion-title">Analyze this</span>
+                <span class="suggestion-desc">Compare Python vs Rust</span>
+              </div>
+              <div class="suggestion-card" onclick="sendPrompt('Create a roadmap for a machine learning app')">
+                <span class="suggestion-icon">🚀</span>
+                <span class="suggestion-title">Help me plan a project</span>
+                <span class="suggestion-desc">Machine Learning app roadmap</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="message-row ai">
-          <div class="msg-avatar"><img src="/assets/logo.svg" alt="NOVAX AI" class="ai-avatar-img" /></div>
-          <div class="bubble ai">Hello! I’m NOVAX-AI, your personal agent. How can I assist you today?</div>
+
+        <div class="chat-bottom">
+          <form class="composer" id="chat-form">
+            <input id="message-input" placeholder="Ask NOVAX anything..." autocomplete="off" />
+            <button type="submit" class="send-btn" title="Send message">
+              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
         </div>
       </section>
 
-      <div class="chat-bottom">
-        <form class="composer" id="chat-form">
-          <input id="message-input" placeholder="Ask NOVAX anything..." autocomplete="off" />
-          <button type="submit" class="send-btn" title="Send message">
-            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-          </button>
-        </form>
-      </div>
+      <!-- VIEW 2: CONVERSATIONS -->
+      <section class="view-content" id="view-conversations">
+        <div class="module-container">
+          <div class="module-header">
+            <div class="module-title-box">
+              <h2>Conversations History</h2>
+              <p>Manage and review your active and archived chat sessions with NOVAX.</p>
+            </div>
+            <button class="btn-action btn-secondary" onclick="clearAllConversations()">
+              🗑 Clear Current Session
+            </button>
+          </div>
+
+          <div class="memory-grid">
+            <div class="memory-category-card">
+              <div class="memory-cat-header">
+                <span class="memory-cat-title">Today</span>
+              </div>
+              <div class="memory-item" onclick="switchView('chat')">
+                <div class="memory-item-info">
+                  <span class="memory-val">NOVAX Architecture & Interface</span>
+                  <span class="memory-key">Active Session • Just now</span>
+                </div>
+              </div>
+              <div class="memory-item" onclick="switchView('chat')">
+                <div class="memory-item-info">
+                  <span class="memory-val">Python Data Structures Practice</span>
+                  <span class="memory-key">2 hours ago</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="memory-category-card">
+              <div class="memory-cat-header">
+                <span class="memory-cat-title">Yesterday</span>
+              </div>
+              <div class="memory-item">
+                <div class="memory-item-info">
+                  <span class="memory-val">DSA Problem Solving & LeetCode</span>
+                  <span class="memory-key">Yesterday • 4:15 PM</span>
+                </div>
+              </div>
+              <div class="memory-item">
+                <div class="memory-item-info">
+                  <span class="memory-val">Hackathon Brainstorming & Ideas</span>
+                  <span class="memory-key">Yesterday • 11:30 AM</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="memory-category-card">
+              <div class="memory-cat-header">
+                <span class="memory-cat-title">Older</span>
+              </div>
+              <div class="memory-item">
+                <div class="memory-item-info">
+                  <span class="memory-val">System Architecture & Intent Systems</span>
+                  <span class="memory-key">3 days ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: MEMORY -->
+      <section class="view-content" id="view-memory">
+        <div class="module-container">
+          <div class="module-header">
+            <div class="module-title-box">
+              <h2>NOVAX Agent Memory</h2>
+              <p>Personal information, education, preferences, and interests remembered by NOVAX.</p>
+            </div>
+            <button class="btn-action" onclick="toggleMemoryForm()">
+              ＋ Add Memory
+            </button>
+          </div>
+
+          <div class="memory-notice">
+            🔒 <span>Memories belong to you. Information stored here shapes NOVAX's personal responses while staying strictly local.</span>
+          </div>
+
+          <!-- Add Memory Form -->
+          <div class="memory-form-box" id="memory-add-form" style="display: none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Category</label>
+                <select id="mem-category">
+                  <option value="profile">PROFILE</option>
+                  <option value="education">EDUCATION</option>
+                  <option value="preferences">PREFERENCES</option>
+                  <option value="interests">INTERESTS</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Key / Aspect</label>
+                <input type="text" id="mem-key" placeholder="e.g. Favorite Language" />
+              </div>
+              <div class="form-group">
+                <label>Value</label>
+                <input type="text" id="mem-value" placeholder="e.g. Python" />
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button class="btn-action btn-secondary" onclick="toggleMemoryForm()">Cancel</button>
+              <button class="btn-action" onclick="saveNewMemory()">Save Memory</button>
+            </div>
+          </div>
+
+          <div class="memory-grid" id="memory-cards-container">
+            <!-- Dynamic items rendered from backend API -->
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: PROJECTS -->
+      <section class="view-content" id="view-projects">
+        <div class="module-container">
+          <div class="module-header">
+            <div class="module-title-box">
+              <h2>Projects Workspace</h2>
+              <p>Organize your chats, code, and agent tasks around your active projects.</p>
+            </div>
+            <button class="btn-action" onclick="alert('Project workspace created for NOVAX-AI')">
+              ＋ New Project
+            </button>
+          </div>
+
+          <div class="projects-grid">
+            <div class="project-card">
+              <div class="project-top">
+                <div class="project-icon">🚀</div>
+                <span class="project-status-badge">Active</span>
+              </div>
+              <h3 class="project-name">NOVAX-AI</h3>
+              <p class="project-desc">Development, documentation, and agent task management for the NOVAX personal assistant.</p>
+              <div class="project-meta">
+                <span>12 Conversations</span>
+                <span>8 Tasks</span>
+              </div>
+            </div>
+
+            <div class="project-card">
+              <div class="project-top">
+                <div class="project-icon">💡</div>
+                <span class="project-status-badge">Research</span>
+              </div>
+              <h3 class="project-name">Hackathon 2026</h3>
+              <p class="project-desc">Research ideas, problem statements, and presentation planning.</p>
+              <div class="project-meta">
+                <span>4 Conversations</span>
+                <span>3 Tasks</span>
+              </div>
+            </div>
+
+            <div class="project-card">
+              <div class="project-top">
+                <div class="project-icon">🧠</div>
+                <span class="project-status-badge">Ongoing</span>
+              </div>
+              <h3 class="project-name">DSA Practice</h3>
+              <p class="project-desc">Data Structures, Algorithms practice, and LeetCode problem notes.</p>
+              <div class="project-meta">
+                <span>9 Conversations</span>
+                <span>5 Tasks</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: TOOLS -->
+      <section class="view-content" id="view-tools">
+        <div class="module-container">
+          <div class="module-header">
+            <div class="module-title-box">
+              <h2>NOVAX Capabilities & Tools</h2>
+              <p>Intelligent tools available to NOVAX for real-time information retrieval and task execution.</p>
+            </div>
+          </div>
+
+          <div class="tools-grid">
+            <div class="tool-card">
+              <div class="tool-header">
+                <div class="tool-icon">🔍</div>
+                <div>
+                  <div class="tool-name">Web Search</div>
+                  <span class="tool-status available">Available (Live)</span>
+                </div>
+              </div>
+              <p class="tool-desc">Search the internet for live news, real-time facts, and verified Wikipedia summaries.</p>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-header">
+                <div class="tool-icon">🧮</div>
+                <div>
+                  <div class="tool-name">Calculator</div>
+                  <span class="tool-status available">Available</span>
+                </div>
+              </div>
+              <p class="tool-desc">Perform mathematical evaluations, unit conversions, and data calculation logic.</p>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-header">
+                <div class="tool-icon">💻</div>
+                <div>
+                  <div class="tool-name">Code Runner</div>
+                  <span class="tool-status available">Available</span>
+                </div>
+              </div>
+              <p class="tool-desc">Analyze, format, and generate clean code snippets across programming languages.</p>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-header">
+                <div class="tool-icon">📄</div>
+                <div>
+                  <div class="tool-name">Document Reader</div>
+                  <span class="tool-status ready">Ready</span>
+                </div>
+              </div>
+              <p class="tool-desc">Parse text content, extract structured data, and summarize key insights.</p>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-header">
+                <div class="tool-icon">📝</div>
+                <div>
+                  <div class="tool-name">Text Analyzer</div>
+                  <span class="tool-status available">Available</span>
+                </div>
+              </div>
+              <p class="tool-desc">Synthesize text, rephrase content, and format tabular markdown data on demand.</p>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-header">
+                <div class="tool-icon">📊</div>
+                <div>
+                  <div class="tool-name">Data Analyzer</div>
+                  <span class="tool-status ready">Ready</span>
+                </div>
+              </div>
+              <p class="tool-desc">Process structured datasets and generate clear Markdown table outputs.</p>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-header">
+                <div class="tool-icon">🎨</div>
+                <div>
+                  <div class="tool-name">Image Analyzer</div>
+                  <span class="tool-status soon">Coming Soon</span>
+                </div>
+              </div>
+              <p class="tool-desc">Visual inspection and multimodal image description processing.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: TASKS -->
+      <section class="view-content" id="view-tasks">
+        <div class="module-container">
+          <div class="module-header">
+            <div class="module-title-box">
+              <h2>Agent & User Tasks</h2>
+              <p>Track your goals, daily routines, and items managed with NOVAX.</p>
+            </div>
+            <button class="btn-action" onclick="addNewTask()">＋ Add Task</button>
+          </div>
+
+          <div class="tasks-list" id="tasks-container">
+            <div class="task-item">
+              <div class="task-checkbox checked" onclick="toggleTask(this)">✓</div>
+              <span class="task-text completed">Complete DSA Arrays practice</span>
+              <span class="task-tag">DSA</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox" onclick="toggleTask(this)"></div>
+              <span class="task-text">Update NOVAX README and documentation</span>
+              <span class="task-tag">NOVAX-AI</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox" onclick="toggleTask(this)"></div>
+              <span class="task-text">Study Python async patterns</span>
+              <span class="task-tag">Learning</span>
+            </div>
+            <div class="task-item">
+              <div class="task-checkbox" onclick="toggleTask(this)"></div>
+              <span class="task-text">Hackathon presentation preparation</span>
+              <span class="task-tag">Hackathon</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 7: AUTOMATIONS -->
+      <section class="view-content" id="view-automations">
+        <div class="module-container">
+          <div class="module-header">
+            <div class="module-title-box">
+              <h2>Scheduled Automations</h2>
+              <p>Configure recurring triggers and agent actions performed on schedule.</p>
+            </div>
+          </div>
+
+          <div class="automation-cards">
+            <div class="automation-card">
+              <div class="automation-top">
+                <span class="automation-name">Daily DSA Reminder</span>
+                <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+              <span class="automation-schedule">Every day • 7:00 PM</span>
+              <p class="tool-desc">Sends a daily notification with recommended LeetCode practice problems.</p>
+            </div>
+
+            <div class="automation-card">
+              <div class="automation-top">
+                <span class="automation-name">Project Progress Check</span>
+                <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+              <span class="automation-schedule">Every Monday • 9:00 AM</span>
+              <p class="tool-desc">Summarizes active project tasks and highlights upcoming milestones.</p>
+            </div>
+
+            <div class="automation-card">
+              <div class="automation-top">
+                <span class="automation-name">AI News Feed Briefing</span>
+                <div class="toggle-switch" onclick="toggleSwitch(this)">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+              <span class="automation-schedule">Every morning • 8:00 AM</span>
+              <p class="tool-desc">Fetches live AI technology developments and summarizes headlines.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 8: SETTINGS -->
+      <section class="view-content" id="view-settings">
+        <div class="module-container">
+          <div class="module-header">
+            <div class="module-title-box">
+              <h2>Settings & Preferences</h2>
+              <p>Customize NOVAX appearance, AI models, and system configuration.</p>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <span class="settings-group-title">Appearance Theme</span>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Visual Theme</div>
+                <div class="setting-desc">Primary visual theme for NOVAX Interface</div>
+              </div>
+              <select style="background: var(--novax-surface-secondary); border: 1px solid var(--novax-border); color: var(--novax-text); padding: 8px 12px; border-radius: 8px;">
+                <option selected>NOVAX — Deep Space</option>
+                <option>Dark Neutral</option>
+                <option>System Default</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <span class="settings-group-title">AI Engine & Search</span>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Live Web Search Enrichment</div>
+                <div class="setting-desc">Allow NOVAX to query Wikipedia and real-time news feeds</div>
+              </div>
+              <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <span class="settings-group-title">About NOVAX</span>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Version</div>
+                <div class="setting-desc">NOVAX AI Personal Agent v2.0.0 (Deep Space)</div>
+              </div>
+              <span class="header-badge">Latest</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -735,37 +1773,147 @@ HTML_PAGE = r"""
     const form = document.getElementById('chat-form');
     const input = document.getElementById('message-input');
     const sidebar = document.getElementById('sidebar');
+    const welcomeHero = document.getElementById('welcome-hero');
+    const headerTitleText = document.getElementById('header-title-text');
+    const headerSubtitleText = document.getElementById('header-subtitle-text');
+    const aiStatusBadge = document.getElementById('ai-status-badge');
+
+    let currentView = 'chat';
 
     function toggleSidebar() {
       sidebar.classList.toggle('open');
     }
 
-    function clearMessages() {
+    function switchView(viewName, el) {
+      currentView = viewName;
+      document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+      const targetView = document.getElementById(`view-${viewName}`);
+      if (targetView) targetView.classList.add('active');
+
+      if (el) el.classList.add('active');
+
+      // Update Header Text dynamically
+      const viewTitles = {
+        'chat': { title: 'NOVAX Intelligence', status: 'Deep Space v2.0 • Ready • Personal Agent Active' },
+        'conversations': { title: 'Conversations', status: 'Chat Session Management & History' },
+        'memory': { title: 'Agent Memory', status: 'Personal Memory & Preferences' },
+        'projects': { title: 'Projects Workspace', status: 'Active Development & Goal Tracking' },
+        'tools': { title: 'Tools & Capabilities', status: 'Agent Integration & Web Search' },
+        'tasks': { title: 'Tasks & Planning', status: 'Goal Management & Daily Checklists' },
+        'automations': { title: 'Scheduled Automations', status: 'Recurring Agent Actions & Triggers' },
+        'settings': { title: 'Settings', status: 'Theme, AI Engine, & Configuration' }
+      };
+
+      if (viewTitles[viewName]) {
+        headerTitleText.textContent = viewTitles[viewName].title;
+        headerSubtitleText.textContent = viewTitles[viewName].status;
+      }
+
+      if (viewName === 'memory') {
+        loadMemories();
+      }
+
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+      }
+    }
+
+    function startNewChat() {
+      switchView('chat', document.querySelector('.nav-item'));
+      fetch('/api/clear', { method: 'POST' }).catch(() => {});
+
       messages.innerHTML = `
-        <div class="welcome-card">
+        <div class="welcome-card" id="welcome-hero">
+          <img src="/assets/logo.svg" alt="NOVAX AI" class="welcome-logo" />
           <h1 class="welcome-heading">Welcome to NOVAX</h1>
-          <p class="welcome-subtitle">Your AI assistant is ready to help you.</p>
-        </div>
-        <div class="message-row ai">
-          <div class="msg-avatar">N</div>
-          <div class="bubble ai">Hello! I’m NOVAX-AI, your personal agent. How can I assist you today?</div>
+          <p class="welcome-subtitle">Your intelligent personal agent for reasoning, memory, and automated workflows.</p>
+
+          <div class="suggestion-grid">
+            <div class="suggestion-card" onclick="sendPrompt('Explain Quantum Computing in simple terms')">
+              <span class="suggestion-icon">💡</span>
+              <span class="suggestion-title">Explain something to me</span>
+              <span class="suggestion-desc">Quantum Computing explained simply</span>
+            </div>
+            <div class="suggestion-card" onclick="sendPrompt('Write a Python script for web scraping')">
+              <span class="suggestion-icon">💻</span>
+              <span class="suggestion-title">Help me write code</span>
+              <span class="suggestion-desc">Python web scraper implementation</span>
+            </div>
+            <div class="suggestion-card" onclick="sendPrompt('Compare Python vs Rust for system programming')">
+              <span class="suggestion-icon">📊</span>
+              <span class="suggestion-title">Analyze this</span>
+              <span class="suggestion-desc">Compare Python vs Rust</span>
+            </div>
+            <div class="suggestion-card" onclick="sendPrompt('Create a roadmap for a machine learning app')">
+              <span class="suggestion-icon">🚀</span>
+              <span class="suggestion-title">Help me plan a project</span>
+              <span class="suggestion-desc">Machine Learning app roadmap</span>
+            </div>
+          </div>
         </div>
       `;
     }
 
+    function sendPrompt(text) {
+      input.value = text;
+      form.dispatchEvent(new Event('submit'));
+    }
+
     function formatMarkdown(text) {
       if (!text) return '';
-      text = text.replace(/https?:\/\/maps\.app\.goo\.gl\/[^\s\)]+/g, 'https://www.google.com/maps');
-
       let html = text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
+      // Markdown Tables
+      if (html.includes('|')) {
+        const lines = html.split('\n');
+        let inTable = false;
+        let tableHtml = '';
+        let processedLines = [];
+
+        lines.forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+            if (!inTable) {
+              inTable = true;
+              tableHtml = '<table>';
+            }
+
+            if (trimmed.includes('---')) {
+              return; // Skip separator line
+            }
+
+            const cells = trimmed.split('|').slice(1, -1);
+            const tag = tableHtml.includes('<th>') ? 'td' : 'th';
+            tableHtml += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+          } else {
+            if (inTable) {
+              inTable = false;
+              tableHtml += '</table>';
+              processedLines.push(tableHtml);
+              tableHtml = '';
+            }
+            processedLines.push(line);
+          }
+        });
+        if (inTable) {
+          tableHtml += '</table>';
+          processedLines.push(tableHtml);
+        }
+        html = processedLines.join('\n');
+      }
+
+      // Code blocks
+      html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
       // Convert Markdown Images: ![alt](url)
       html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s\)]+)\)/g, function(match, alt, url) {
-        const fallbackUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(alt || 'photo') + '?width=600&height=400&nologo=true';
-        return `<img src="${url}" alt="${alt}" class="chat-img" onclick="window.open('${url}', '_blank')" onerror="this.onerror=null; this.src='${fallbackUrl}';" />`;
+        return `<img src="${url}" alt="${alt}" style="max-width:100%; border-radius:8px; margin:8px 0;" />`;
       });
 
       // Convert Markdown links: [Link Text](https://...)
@@ -792,6 +1940,11 @@ HTML_PAGE = r"""
     }
 
     function appendBubble(role, text) {
+      const hero = document.getElementById('welcome-hero');
+      if (hero && messages.children.length === 1) {
+        hero.style.display = 'none';
+      }
+
       const row = document.createElement('div');
       row.className = `message-row ${role}`;
       
@@ -819,23 +1972,26 @@ HTML_PAGE = r"""
     }
 
     function showTyping() {
+      aiStatusBadge.textContent = '● Thinking...';
+      aiStatusBadge.style.color = 'var(--novax-cyan)';
+      aiStatusBadge.style.borderColor = 'rgba(34, 211, 238, 0.3)';
+
       const typing = document.createElement('div');
       typing.id = 'typing';
       typing.className = 'typing-indicator';
-      typing.textContent = 'NOVAX is processing...';
+      typing.innerHTML = '<div class="pulse-dot"></div> NOVAX is processing...';
       messages.appendChild(typing);
       scrollToBottom();
     }
 
     function hideTyping() {
+      aiStatusBadge.textContent = '● Ready';
+      aiStatusBadge.style.color = 'var(--novax-success)';
+      aiStatusBadge.style.borderColor = 'rgba(34, 197, 94, 0.25)';
+
       const typing = document.getElementById('typing');
       if (typing) typing.remove();
       scrollToBottom();
-    }
-
-    function sendSuggested(promptText) {
-      input.value = promptText;
-      form.dispatchEvent(new Event('submit'));
     }
 
     form.addEventListener('submit', async (event) => {
@@ -862,6 +2018,132 @@ HTML_PAGE = r"""
         appendBubble('ai', 'Sorry, I could not reach the assistant right now.');
       }
     });
+
+    // MEMORY INTEGRATION
+    async function loadMemories() {
+      const container = document.getElementById('memory-cards-container');
+      container.innerHTML = '<p style="color: var(--novax-muted);">Loading memory items...</p>';
+
+      try {
+        const res = await fetch('/api/memory');
+        const memoryData = await res.json();
+
+        container.innerHTML = '';
+        const categories = ['profile', 'education', 'preferences', 'interests'];
+
+        categories.forEach(cat => {
+          const items = memoryData[cat] || {};
+          const card = document.createElement('div');
+          card.className = 'memory-category-card';
+
+          let itemsHtml = '';
+          const keys = Object.keys(items);
+
+          if (keys.length === 0) {
+            itemsHtml = `<div style="font-size: 0.82rem; color: var(--novax-disabled); font-style: italic;">No ${cat} memories stored yet.</div>`;
+          } else {
+            keys.forEach(k => {
+              itemsHtml += `
+                <div class="memory-item">
+                  <div class="memory-item-info">
+                    <span class="memory-key">${k}</span>
+                    <span class="memory-val">${items[k]}</span>
+                  </div>
+                  <button class="memory-del-btn" onclick="deleteMemory('${cat}', '${k}')" title="Delete Memory">✕</button>
+                </div>
+              `;
+            });
+          }
+
+          card.innerHTML = `
+            <div class="memory-cat-header">
+              <span class="memory-cat-title">${cat.toUpperCase()}</span>
+            </div>
+            ${itemsHtml}
+          `;
+
+          container.appendChild(card);
+        });
+      } catch (err) {
+        container.innerHTML = '<p style="color: var(--novax-error);">Failed to load memory data.</p>';
+      }
+    }
+
+    function toggleMemoryForm() {
+      const f = document.getElementById('memory-add-form');
+      f.style.display = (f.style.display === 'none') ? 'flex' : 'none';
+    }
+
+    async function saveNewMemory() {
+      const category = document.getElementById('mem-category').value;
+      const key = document.getElementById('mem-key').value.trim();
+      const value = document.getElementById('mem-value').value.trim();
+
+      if (!key || !value) {
+        alert('Please fill in both key and value.');
+        return;
+      }
+
+      try {
+        await fetch('/api/memory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category, key, value })
+        });
+        document.getElementById('mem-key').value = '';
+        document.getElementById('mem-value').value = '';
+        toggleMemoryForm();
+        loadMemories();
+      } catch (e) {
+        alert('Failed to save memory.');
+      }
+    }
+
+    async function deleteMemory(category, key) {
+      if (!confirm(`Delete memory item "${key}" from ${category.toUpperCase()}?`)) return;
+
+      try {
+        await fetch('/api/memory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category, key, delete: true })
+        });
+        loadMemories();
+      } catch (e) {
+        alert('Failed to delete memory.');
+      }
+    }
+
+    function clearAllConversations() {
+      if (confirm('Clear active chat session history?')) {
+        startNewChat();
+      }
+    }
+
+    function toggleTask(el) {
+      el.classList.toggle('checked');
+      const textEl = el.nextElementSibling;
+      if (textEl) textEl.classList.toggle('completed');
+    }
+
+    function addNewTask() {
+      const taskText = prompt('Enter new task description:');
+      if (!taskText || !taskText.trim()) return;
+
+      const container = document.getElementById('tasks-container');
+      const item = document.createElement('div');
+      item.className = 'task-item';
+      item.innerHTML = `
+        <div class="task-checkbox" onclick="toggleTask(this)"></div>
+        <span class="task-text">${taskText.trim()}</span>
+        <span class="task-tag">User Task</span>
+      `;
+      container.appendChild(item);
+    }
+
+    function toggleSwitch(el) {
+      el.classList.toggle('active');
+    }
   </script>
 </body>
 </html>
@@ -885,14 +2167,15 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(content)
                 return
+        elif parsed.path == "/api/memory":
+            memories = self.server.brain.memory.load_memory()
+            self._send_json(memories)
+            return
 
         self._send_json({"error": "not found"}, status=404)
 
     def do_POST(self):
         parsed = urlparse(self.path)
-        if parsed.path != "/api/chat":
-            self._send_json({"error": "not found"}, status=404)
-            return
 
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length).decode("utf-8") if length else "{}"
@@ -903,13 +2186,41 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "invalid json"}, status=400)
             return
 
-        message = (data.get("message") or "").strip()
-        if not message:
-            self._send_json({"error": "message is required"}, status=400)
+        if parsed.path == "/api/chat":
+            message = (data.get("message") or "").strip()
+            if not message:
+                self._send_json({"error": "message is required"}, status=400)
+                return
+
+            response = self.server.brain.get_response(message)
+            self._send_json({"reply": response})
             return
 
-        response = self.server.brain.get_response(message)
-        self._send_json({"reply": response})
+        elif parsed.path == "/api/memory":
+            category = data.get("category")
+            key = data.get("key")
+            value = data.get("value")
+            is_delete = data.get("delete", False)
+
+            if not category or not key:
+                self._send_json({"error": "category and key required"}, status=400)
+                return
+
+            if is_delete:
+                self.server.brain.memory.delete(category, key)
+            else:
+                self.server.brain.memory.set(category, key, value)
+
+            updated = self.server.brain.memory.load_memory()
+            self._send_json({"success": True, "memory": updated})
+            return
+
+        elif parsed.path == "/api/clear":
+            self.server.brain.conversation.clear()
+            self._send_json({"success": True})
+            return
+
+        self._send_json({"error": "not found"}, status=404)
 
     def log_message(self, format, *args):
         return
@@ -966,4 +2277,3 @@ def run_server(host="127.0.0.1", port=None):
         print("\nShutting down NOVAX server...")
     finally:
         server.server_close()
-
