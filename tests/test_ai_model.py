@@ -16,6 +16,8 @@ class AIModelTests(unittest.TestCase):
                 response = model.ask([{"role": "user", "content": "hello"}])
 
         self.assertIn("NOVAX", response)
+        self.assertIn("Ollama is not active", response)
+        self.assertIn("running in the background", response)
         self.assertIn("hello", response.lower())
 
 

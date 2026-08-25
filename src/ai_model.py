@@ -51,13 +51,7 @@ class AIModel:
         latest_message = messages[-1]["content"] if messages else ""
         latest_message = latest_message.strip() or "your message"
 
-        if error:
-            return (
-                f"NOVAX-AI is running in offline mode right now because the model service is unavailable. "
-                f"I heard: {latest_message}. I can still help with chat, memory, and quick assistance."
-            )
-
         return (
-            f"NOVAX-AI is running in offline mode right now. I heard: {latest_message}. "
-            "I can still help with chat, memory, and quick assistance."
+            f"NOVAX-AI model Ollama is not active right now. Please make sure the Ollama model is running in the background. "
+            f"I heard: {latest_message}. I can still help with chat, memory, and quick assistance."
         )
