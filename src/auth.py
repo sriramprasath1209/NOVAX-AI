@@ -5,6 +5,7 @@ import os
 import urllib.parse
 import urllib.request
 import json
+import src.config
 from src.db import db
 
 SESSION_DURATION = 7 * 24 * 60 * 60  # 7 days in seconds

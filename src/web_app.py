@@ -966,16 +966,21 @@ HTML_PAGE = r"""<!DOCTYPE html>
     }
 
     async function handleGoogleLogin() {
+      hideError('login-error');
+      hideError('signup-error');
       try {
         const res = await fetch('/api/auth/google');
         const data = await res.json();
         if (data.url) {
           window.location.href = data.url;
         } else {
-          alert('Google Authentication is not configured on the server. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.');
+          const msg = 'Google Auth is not configured. Please add GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET to your .env file.';
+          showError('login-error', msg);
+          showError('signup-error', msg);
         }
       } catch (e) {
-        alert('Google Authentication failed to launch.');
+        showError('login-error', 'Google Authentication failed to launch.');
+        showError('signup-error', 'Google Authentication failed to launch.');
       }
     }
 
@@ -985,6 +990,35 @@ HTML_PAGE = r"""<!DOCTYPE html>
       } catch (e) {}
       currentUser = null;
       showView('login-view');
+    }
+
+    function formatMessageText(text) {
+      if (!text) return '';
+
+      // Escape raw HTML tags first
+      let html = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Convert Markdown links: [Title](https://...) -> clickable <a> tag
+      html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, function(match, label, url) {
+        return `<a href="${url}" target="_blank" rel="noopener" style="color: var(--novax-cyan); font-weight: 600; text-decoration: underline; word-break: break-all;">${label}</a>`;
+      });
+
+      // Convert standalone URLs: https://... -> clickable <a> tag
+      html = html.replace(/(^|[\s(])(https?:\/\/[^\s\)]+)/g, function(match, space, url) {
+        if (match.includes('href=')) return match;
+        return `${space}<a href="${url}" target="_blank" rel="noopener" style="color: var(--novax-cyan); font-weight: 600; text-decoration: underline; word-break: break-all;">${url}</a>`;
+      });
+
+      // Convert bold **text** -> <strong>text</strong>
+      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+      // Convert newlines -> <br/>
+      html = html.replace(/\n/g, '<br/>');
+
+      return html;
     }
 
     async function sendMessage() {
@@ -1012,7 +1046,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
         const assistantBubble = document.createElement('div');
         assistantBubble.className = 'chat-bubble assistant';
-        assistantBubble.innerText = data.reply || 'No response returned.';
+        assistantBubble.innerHTML = formatMessageText(data.reply || 'No response returned.');
         container.appendChild(assistantBubble);
         container.scrollTop = container.scrollHeight;
       } catch (e) {

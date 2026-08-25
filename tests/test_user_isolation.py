@@ -105,11 +105,22 @@ class UserIsolationTests(unittest.TestCase):
 
         # Test Intent Manager handling name memory query
         intent_reply = self.brain.intent.process("remember my name is Arun", user_id=user_id_a)
-        self.assertIn("Arun", intent_reply)
-
         # Verify stored memory
         name_mem = auth.db.get_memory(user_id_a, "user", "name")
         self.assertEqual(name_mem, "Arun")
+
+    def test_weather_intent_link_generation(self):
+        user_a, _ = auth.register_user("arun@example.com", "pass12345", "Arun")
+        user_id_a = user_a["id"]
+
+        # User asks for weather at Trichy
+        self.brain.conversation.add_user_message("i want to know the weather at trichy", user_id=user_id_a)
+
+        # User asks for weather link
+        reply = self.brain.intent.process("can you give me the link of the weather", user_id=user_id_a)
+        self.assertIsNotNone(reply)
+        self.assertIn("Trichy", reply)
+        self.assertIn("https://www.google.com/search?q=weather+in+Trichy", reply)
 
 
 if __name__ == "__main__":

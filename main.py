@@ -1,3 +1,4 @@
+import src.config
 from src.assistant import Assistant
 
 
