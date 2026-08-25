@@ -1,18 +1,43 @@
 # NOVAX-AI 🚀
 
-**NOVAX-AI** is a privacy-first, local personal AI assistant designed to run locally on your own machine.
-
-> ⚠️ **Note on Scope**: This project is built specifically as a **Local Personal AI Assistant** powered by local models (via Ollama). Unlike cloud-hosted services like ChatGPT, NOVAX-AI runs locally on your device to keep your data private and accessible offline.
+**NOVAX-AI** is a privacy-first personal AI assistant featuring multi-user authentication, strict user data isolation, local AI execution (via Ollama), memory, and deep space web UI.
 
 ---
 
 ## ✨ Features
 
-- 🏠 **Local Execution**: Uses local LLMs (such as `gemma3` via Ollama) without requiring external paid API subscriptions.
-- 🎨 **ChatGPT-style Web Interface**: Clean, dark-mode web UI with smooth auto-scrolling, pinned input tab, and interactive web links.
-- 💻 **CLI & Web Modes**: Run in your terminal or in your web browser (`http://localhost:8000`).
-- 🧠 **Local Memory**: Remembers user details and conversations locally.
-- ⚡ **Offline Fallback**: Remains responsive with smart fallback assistance even when offline or when model services are paused.
+- 🔐 **Multi-User Authentication**: Complete Sign In, Sign Up, Google OAuth 2.0, session management, and logout flows.
+- 🛡️ **User Data Isolation**: Every user gets their own private workspace. Memories, conversations, projects, and tasks are strictly isolated per user ID.
+- 🎨 **Deep Space Visual Interface**: Dark-mode web UI matching NOVAX design language with dark space background, radial indigo glow, subtle cyan accents, and active user profile.
+- 🏠 **Local Execution**: Uses local LLMs (`gemma3` via Ollama) with smart offline fallback notifications.
+- 🧠 **Isolated Personal Memory**: Remembers user preferences and context separately for each account.
+
+---
+
+## 🔑 Authentication & User Isolation
+
+NOVAX-AI enforces strict user boundary separation (**ONE USER = ONE PRIVATE WORKSPACE**):
+- **User Identity**: Tracks the authenticated user's name, email, memories, and chat history.
+- **Product Identity**: Remembers that NOVAX-AI was created by Sriram Prasath.
+
+### Database Schema (`data/novax.db`)
+- `users`: User profiles, hashed passwords with unique salts (PBKDF2), and Google OAuth IDs.
+- `sessions`: Secure session tokens and expiration timestamps.
+- `memories`: Per-user category/key/value memory store.
+- `conversations` & `messages`: Per-user chat history and message logs.
+- `projects` & `tasks`: Per-user project management and task items.
+
+---
+
+## ⚙️ Environment Variables
+
+Create a `.env` file or export the following environment variables:
+
+```env
+PORT=8000
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+```
 
 ---
 
@@ -20,30 +45,37 @@
 
 ### 1. Prerequisites
 - Python 3.10+
-- [Ollama](https://ollama.com/) installed on your computer with `gemma3` model pulled:
+- [Ollama](https://ollama.com/) with `gemma3`:
   ```bash
   ollama pull gemma3
   ```
 
-### 2. Setup & Installation
-Clone the repository and activate your virtual environment:
+### 2. Setup
 ```bash
 cd NOVAX-AI
 source .venv/bin/activate
 ```
 
-### 3. Launching the App
-
+### 3. Launch Application
 * **Web UI Mode** (Recommended):
   ```bash
   python3 main.py web
   ```
-  Open **`http://localhost:8000`** in your browser.
+  Navigate to **`http://localhost:8000`** in your browser.
 
-* **Terminal CLI Mode**:
+* **CLI Mode**:
   ```bash
   python3 main.py
   ```
+
+---
+
+## 🧪 Running Tests
+
+Run the full test suite (including user isolation and fallback tests):
+```bash
+python3 -m unittest discover -s tests
+```
 
 ---
 

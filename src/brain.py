@@ -16,17 +16,21 @@ class Brain:
         # Create the Intent Manager
         self.intent = IntentManager(self)
 
-    def get_response(self, user_message):
+    def get_response(self, user_message, user_id="default_user", user_name=None):
+
+        # Fetch stored user name if not provided
+        if not user_name:
+            user_name = self.memory.get("user", "name", user_id=user_id) or "User"
 
         # Give the Intent Manager the first chance to handle the message
-        response = self.intent.process(user_message)
+        response = self.intent.process(user_message, user_id=user_id)
 
         # If the Intent Manager handled it, return the result
         if response is not None:
             return response
 
         # Otherwise continue with the normal AI conversation
-        self.conversation.add_user_message(user_message)
+        self.conversation.add_user_message(user_message, user_id=user_id)
 
         # Detect if the user explicitly requested a tabular response.
         tabular_requests = [
@@ -37,6 +41,19 @@ class Brain:
         lower = user_message.lower()
 
         tabular_requested = any(kw in lower for kw in tabular_requests)
+
+        # Build authenticated user context system message
+        user_context_message = {
+            "role": "system",
+            "content": (
+                f"[Authenticated User Context]\n"
+                f"Current User Name: {user_name}\n"
+                f"User ID: {user_id}\n\n"
+                f"Product Identity: You are NOVAX-AI, an intelligent personal AI agent created by Sriram Prasath. "
+                f"You are currently assisting {user_name}. If asked 'who created NOVAX' or 'who made you', answer Sriram Prasath. "
+                f"If asked 'what is my name' or 'who am I', answer that their name is {user_name}."
+            )
+        }
 
         # Live Web Search & Real-Time News enrichment
         search_context_message = None
@@ -75,7 +92,8 @@ class Brain:
                         )
                     }
 
-        messages_to_send = self.conversation.get_messages()
+        user_messages = self.conversation.get_messages(user_id=user_id)
+        messages_to_send = [user_context_message] + user_messages
         if search_context_message:
             messages_to_send = [search_context_message] + messages_to_send
 
@@ -128,6 +146,6 @@ class Brain:
                     # If the conversion fails, keep the original response.
                     pass
 
-        self.conversation.add_assistant_message(response)
+        self.conversation.add_assistant_message(response, user_id=user_id)
 
         return response

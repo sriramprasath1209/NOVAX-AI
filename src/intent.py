@@ -10,10 +10,10 @@ class IntentManager:
         # Register all intents here
         self.memory_intent = MemoryIntent(brain)
 
-    def process(self, user_message):
+    def process(self, user_message, user_id="default_user"):
 
         # Check Memory Intent
-        response = self.memory_intent.process(user_message)
+        response = self.memory_intent.process(user_message, user_id=user_id)
 
         if response is not None:
             return response

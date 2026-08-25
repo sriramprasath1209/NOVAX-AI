@@ -3,7 +3,7 @@ class MemoryIntent:
     def __init__(self, brain):
         self.brain = brain
 
-    def process(self, user_message):
+    def process(self, user_message, user_id="default_user"):
 
         message = user_message.lower().strip()
 
@@ -16,9 +16,10 @@ class MemoryIntent:
                 return "Please tell me the name you want me to remember."
 
             self.brain.memory.set(
-                "profile",
+                "user",
                 "name",
-                name
+                name,
+                user_id=user_id
             )
 
             return f"I'll remember that your name is {name}."

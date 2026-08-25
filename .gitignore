@@ -17,5 +17,6 @@ __pycache__/
 # Logs
 *.log
 
-# NOVAX-AI personal memory
+# NOVAX-AI personal data
 data/memory.json
+data/*.db
