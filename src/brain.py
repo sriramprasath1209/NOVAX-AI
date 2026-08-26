@@ -3,6 +3,7 @@ from src.conversation import Conversation
 from src.memory import MemoryManager
 from src.intent import IntentManager
 from src.search_engine import SearchEngine
+from src.db import db
 
 
 class Brain:
@@ -16,21 +17,40 @@ class Brain:
         # Create the Intent Manager
         self.intent = IntentManager(self)
 
-    def get_response(self, user_message, user_id="default_user", user_name=None):
+    def get_response(self, user_message, user_id="default_user", user_name=None, conversation_id=None):
 
         # Fetch stored user name if not provided
         if not user_name:
             user_name = self.memory.get("user", "name", user_id=user_id) or "User"
 
+        # Ensure conversation exists in DB if conversation_id provided
+        if conversation_id:
+            existing_conv = db.get_conversation(conversation_id, user_id)
+            if not existing_conv:
+                # Auto-generate title from first user message
+                title_text = user_message.strip()
+                if len(title_text) > 35:
+                    title_text = title_text[:35].strip() + "..."
+                title = (title_text[0].upper() + title_text[1:]) if title_text else "New Chat"
+                db.create_conversation(conversation_id, user_id, title=title)
+            elif existing_conv.get("title") == "New Chat":
+                title_text = user_message.strip()
+                if len(title_text) > 35:
+                    title_text = title_text[:35].strip() + "..."
+                title = (title_text[0].upper() + title_text[1:]) if title_text else "New Chat"
+                db.update_conversation_title(conversation_id, user_id, title)
+
         # Give the Intent Manager the first chance to handle the message
         response = self.intent.process(user_message, user_id=user_id)
 
-        # If the Intent Manager handled it, return the result
+        # If the Intent Manager handled it, save & return the result
         if response is not None:
+            self.conversation.add_user_message(user_message, user_id=user_id, conversation_id=conversation_id)
+            self.conversation.add_assistant_message(response, user_id=user_id, conversation_id=conversation_id)
             return response
 
         # Otherwise continue with the normal AI conversation
-        self.conversation.add_user_message(user_message, user_id=user_id)
+        self.conversation.add_user_message(user_message, user_id=user_id, conversation_id=conversation_id)
 
         # Detect if the user explicitly requested a tabular response.
         tabular_requests = [
@@ -92,7 +112,7 @@ class Brain:
                         )
                     }
 
-        user_messages = self.conversation.get_messages(user_id=user_id)
+        user_messages = self.conversation.get_messages(user_id=user_id, conversation_id=conversation_id)
         messages_to_send = [user_context_message] + user_messages
         if search_context_message:
             messages_to_send = [search_context_message] + messages_to_send
@@ -146,6 +166,6 @@ class Brain:
                     # If the conversion fails, keep the original response.
                     pass
 
-        self.conversation.add_assistant_message(response, user_id=user_id)
+        self.conversation.add_assistant_message(response, user_id=user_id, conversation_id=conversation_id)
 
         return response

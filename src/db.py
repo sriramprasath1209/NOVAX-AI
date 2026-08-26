@@ -248,16 +248,40 @@ class Database:
     def get_user_conversations(self, user_id):
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM conversations WHERE user_id = ? ORDER BY created_at DESC", (user_id,))
+            cursor.execute("""
+                SELECT c.id, c.user_id, c.title, c.created_at,
+                       COUNT(m.id) as message_count,
+                       MAX(m.created_at) as last_message_at
+                FROM conversations c
+                LEFT JOIN messages m ON c.id = m.conversation_id AND c.user_id = m.user_id
+                WHERE c.user_id = ?
+                GROUP BY c.id
+                ORDER BY COALESCE(MAX(m.created_at), c.created_at) DESC
+            """, (user_id,))
             return [dict(row) for row in cursor.fetchall()]
+
+    def get_conversation(self, conv_id, user_id):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM conversations WHERE id = ? AND user_id = ?", (conv_id, user_id))
+            row = cursor.fetchone()
+            return dict(row) if row else None
 
     def create_conversation(self, conv_id, user_id, title="New Chat"):
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO conversations (id, user_id, title, created_at)
+                INSERT OR IGNORE INTO conversations (id, user_id, title, created_at)
                 VALUES (?, ?, ?, ?)
             """, (conv_id, user_id, title, time.time()))
+            conn.commit()
+
+    def update_conversation_title(self, conv_id, user_id, title):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE conversations SET title = ? WHERE id = ? AND user_id = ?
+            """, (title, conv_id, user_id))
             conn.commit()
 
     def add_message(self, conv_id, user_id, role, content):
@@ -273,11 +297,17 @@ class Database:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT role, content FROM messages 
-                WHERE conversation_id = ? AND user_id = ? 
+                SELECT id, conversation_id, user_id, role, content, created_at FROM messages
+                WHERE conversation_id = ? AND user_id = ?
                 ORDER BY id ASC
             """, (conv_id, user_id))
             return [dict(row) for row in cursor.fetchall()]
+
+    def delete_message(self, message_id, user_id):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM messages WHERE id = ? AND user_id = ?", (message_id, user_id))
+            conn.commit()
 
     def delete_user_conversation(self, conv_id, user_id):
         with self.get_connection() as conn:

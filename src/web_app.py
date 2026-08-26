@@ -591,6 +591,155 @@ HTML_PAGE = r"""<!DOCTYPE html>
       font-size: 13px;
       color: var(--novax-text-secondary);
     }
+
+    /* Sidebar Conversations List */
+    .sidebar-conv-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin: 4px 0 12px 0;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .sidebar-conv-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--novax-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .sidebar-conv-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--novax-text);
+    }
+
+    .sidebar-conv-item.active {
+      background: var(--novax-nav-active-bg);
+      border: 1px solid var(--novax-nav-active-border);
+      color: var(--novax-cyan);
+      font-weight: 600;
+    }
+
+    .sidebar-conv-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .sidebar-conv-del {
+      opacity: 0;
+      background: transparent;
+      border: none;
+      color: var(--novax-muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-conv-item:hover .sidebar-conv-del {
+      opacity: 1;
+    }
+
+    .sidebar-conv-del:hover {
+      color: var(--novax-error);
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    /* Message Bubbles & Actions */
+    .chat-bubble-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .chat-bubble-wrapper.user {
+      align-items: flex-end;
+    }
+
+    .chat-bubble-wrapper.assistant {
+      align-items: flex-start;
+    }
+
+    .msg-delete-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      opacity: 0;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--novax-border);
+      color: var(--novax-muted);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .chat-bubble-wrapper:hover .msg-delete-btn {
+      opacity: 1;
+    }
+
+    .msg-delete-btn:hover {
+      color: #FCA5A5;
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    /* Conversations Panel Cards */
+    .conv-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .conv-card:hover {
+      border-color: var(--novax-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+    }
+
+    .conv-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .conv-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--novax-text);
+      margin: 0;
+      word-break: break-word;
+    }
+
+    .conv-card-meta {
+      font-size: 12px;
+      color: var(--novax-muted);
+      margin-bottom: 14px;
+    }
+
+    .conv-card-actions {
+      display: flex;
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -738,14 +887,17 @@ HTML_PAGE = r"""<!DOCTYPE html>
           </div>
         </div>
 
-        <button class="btn-new-chat" onclick="showPanel('chat-panel')">
+        <button class="btn-new-chat" onclick="startNewChat()">
           <span>＋ New Chat</span>
         </button>
 
         <div class="nav-section">
           <div class="nav-section-title">Workspace</div>
-          <div class="nav-item active" onclick="showPanel('chat-panel')">
+          <div class="nav-item active" id="nav-item-conversations-panel" onclick="showPanel('conversations-panel')">
             <span>◉ Conversations</span>
+          </div>
+          <div class="nav-item" id="nav-item-chat" onclick="showPanel('chat-panel')">
+            <span>💬 Active Chat</span>
           </div>
           <div class="nav-item" onclick="showPanel('memory-panel')">
             <span>🧠 Memory</span>
@@ -790,20 +942,41 @@ HTML_PAGE = r"""<!DOCTYPE html>
       <!-- Main Content -->
       <main class="main-workspace">
         <div class="workspace-header">
-          <div id="workspace-title" class="workspace-title">Personal AI Assistant</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div id="workspace-title" class="workspace-title">Personal AI Assistant</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn-logout" id="btn-rename-conv" onclick="renameCurrentConversation()" style="display:none; color:var(--novax-cyan);">✏ Rename</button>
+            <button class="btn-logout" id="btn-delete-conv" onclick="deleteCurrentConversation()" style="display:none; color:#FCA5A5; border-color:rgba(239,68,68,0.3);">🗑 Delete Chat</button>
+            <button class="btn-primary" onclick="startNewChat()" style="padding:6px 14px; font-size:13px; width:auto;">＋ New Chat</button>
+          </div>
         </div>
 
         <!-- Chat Panel -->
         <div id="chat-panel" class="panel-view active">
           <div id="chat-messages" class="chat-container">
-            <div class="chat-bubble assistant">
-              Welcome to NOVAX! I am your personal AI assistant. How can I help you today?
+            <div class="chat-bubble-wrapper assistant">
+              <div class="chat-bubble assistant">
+                Welcome to NOVAX! I am your personal AI assistant. How can I help you today?
+              </div>
             </div>
           </div>
           <div class="chat-input-bar">
             <input type="text" id="user-input" class="chat-input" placeholder="Type your message to NOVAX..." onkeydown="if(event.key==='Enter') sendMessage()" />
             <button class="btn-send" onclick="sendMessage()">Send</button>
           </div>
+        </div>
+
+        <!-- Conversations Panel -->
+        <div id="conversations-panel" class="panel-view">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h2 style="color:var(--novax-cyan); margin:0;">Conversations</h2>
+              <p style="color:var(--novax-muted); font-size:14px; margin:4px 0 0 0;">All your previous chats are stored here with their headings. You can reopen, write on them, or delete them.</p>
+            </div>
+            <input type="text" id="search-conversations-input" class="form-control" style="width:240px;" placeholder="Search conversations..." oninput="filterConversations()" />
+          </div>
+          <div id="conversations-grid" class="card-grid"></div>
         </div>
 
         <!-- Memory Panel -->
@@ -843,6 +1016,12 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
   <script>
     let currentUser = null;
+    let currentConversationId = null;
+    let allConversationsCache = [];
+
+    function generateConvId() {
+      return 'conv_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    }
 
     function showView(viewId) {
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
@@ -852,9 +1031,21 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
     function showPanel(panelId) {
       document.querySelectorAll('.panel-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
       const target = document.getElementById(panelId);
       if (target) target.classList.add('active');
-      if (panelId === 'memory-panel') loadMemories();
+
+      if (panelId === 'chat-panel') {
+        const navItem = document.getElementById('nav-item-chat');
+        if (navItem) navItem.classList.add('active');
+      } else if (panelId === 'conversations-panel') {
+        const navItem = document.getElementById('nav-item-conversations-panel');
+        if (navItem) navItem.classList.add('active');
+        loadConversationsList();
+      } else if (panelId === 'memory-panel') {
+        loadMemories();
+      }
     }
 
     function showError(elementId, msg) {
@@ -878,6 +1069,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
           currentUser = data.user;
           updateUserProfileUI();
           showView('app-view');
+          startNewChat();
         } else {
           showView('login-view');
         }
@@ -890,6 +1082,171 @@ HTML_PAGE = r"""<!DOCTYPE html>
       if (!currentUser) return;
       document.getElementById('user-display-name').innerText = currentUser.name || 'User';
       document.getElementById('user-avatar').innerText = (currentUser.name || 'U').charAt(0).toUpperCase();
+    }
+
+    function startNewChat() {
+      currentConversationId = generateConvId();
+      document.getElementById('workspace-title').innerText = 'New Chat';
+      document.getElementById('btn-rename-conv').style.display = 'none';
+      document.getElementById('btn-delete-conv').style.display = 'none';
+
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = `
+        <div class="chat-bubble-wrapper assistant">
+          <div class="chat-bubble assistant">
+            Welcome to NOVAX! I am your personal AI assistant. How can I help you today?
+          </div>
+        </div>
+      `;
+
+      showPanel('chat-panel');
+      loadConversationsList();
+    }
+
+    async function loadConversationsList() {
+      try {
+        const res = await fetch('/api/conversations');
+        if (!res.ok) return;
+        const conversations = await res.json();
+        allConversationsCache = conversations || [];
+        renderSidebarConversations(allConversationsCache);
+        renderGridConversations(allConversationsCache);
+      } catch (e) {}
+    }
+
+    function renderSidebarConversations(conversations) {
+      const container = document.getElementById('sidebar-conversations-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!conversations || conversations.length === 0) {
+        container.innerHTML = '<div style="font-size:12px; color:var(--novax-muted); padding:6px 10px;">No saved chats yet.</div>';
+        return;
+      }
+
+      conversations.forEach(conv => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-conv-item' + (conv.id === currentConversationId ? ' active' : '');
+        item.onclick = (e) => {
+          if (e.target.classList.contains('sidebar-conv-del')) return;
+          openConversation(conv.id);
+        };
+
+        item.innerHTML = `
+          <span class="sidebar-conv-title" title="${escapeHtml(conv.title)}">💬 ${escapeHtml(conv.title)}</span>
+          <button class="sidebar-conv-del" onclick="deleteConversation('${conv.id}', event)" title="Delete Conversation">✕</button>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderGridConversations(conversations) {
+      const grid = document.getElementById('conversations-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      if (!conversations || conversations.length === 0) {
+        grid.innerHTML = '<div class="data-card"><p>No saved conversations found.</p></div>';
+        return;
+      }
+
+      conversations.forEach(conv => {
+        const card = document.createElement('div');
+        card.className = 'conv-card';
+
+        const dateStr = conv.created_at ? new Date(conv.created_at * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+        const msgCount = conv.message_count || 0;
+
+        card.innerHTML = `
+          <div>
+            <div class="conv-card-header">
+              <h3 class="conv-card-title">${escapeHtml(conv.title)}</h3>
+            </div>
+            <div class="conv-card-meta">
+              📅 ${dateStr} &nbsp;•&nbsp; 💬 ${msgCount} message${msgCount === 1 ? '' : 's'}
+            </div>
+          </div>
+          <div class="conv-card-actions">
+            <button class="btn-primary" style="padding:8px 14px; font-size:13px; flex:1;" onclick="openConversation('${conv.id}')">Open & Write</button>
+            <button class="btn-logout" style="padding:8px 10px; font-size:13px; color:var(--novax-cyan);" onclick="renameConversationPrompt('${conv.id}', '${escapeHtml(conv.title).replace(/'/g, "\\'")}')">✏</button>
+            <button class="btn-logout" style="padding:8px 10px; font-size:13px; color:#FCA5A5;" onclick="deleteConversation('${conv.id}')">🗑</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterConversations() {
+      const q = (document.getElementById('search-conversations-input').value || '').toLowerCase().trim();
+      if (!q) {
+        renderGridConversations(allConversationsCache);
+        return;
+      }
+      const filtered = allConversationsCache.filter(c => (c.title || '').toLowerCase().includes(q));
+      renderGridConversations(filtered);
+    }
+
+    async function openConversation(convId) {
+      try {
+        const res = await fetch('/api/conversations/messages?id=' + encodeURIComponent(convId));
+        if (!res.ok) return;
+        const data = await res.json();
+
+        currentConversationId = convId;
+        document.getElementById('workspace-title').innerText = data.title || 'Conversation';
+        document.getElementById('btn-rename-conv').style.display = 'inline-block';
+        document.getElementById('btn-delete-conv').style.display = 'inline-block';
+
+        const container = document.getElementById('chat-messages');
+        container.innerHTML = '';
+
+        if (!data.messages || data.messages.length === 0) {
+          container.innerHTML = `
+            <div class="chat-bubble-wrapper assistant">
+              <div class="chat-bubble assistant">No messages in this chat session yet. Type below to write!</div>
+            </div>
+          `;
+        } else {
+          data.messages.forEach(msg => {
+            appendMessageBubble(msg.role, msg.content, msg.id);
+          });
+        }
+
+        showPanel('chat-panel');
+        renderSidebarConversations(allConversationsCache);
+        container.scrollTop = container.scrollHeight;
+      } catch (e) {}
+    }
+
+    function appendMessageBubble(role, content, msgId) {
+      const container = document.getElementById('chat-messages');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chat-bubble-wrapper ' + (role === 'user' ? 'user' : 'assistant');
+      if (msgId) wrapper.dataset.msgId = msgId;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble ' + (role === 'user' ? 'user' : 'assistant');
+
+      if (role === 'user') {
+        bubble.innerText = content;
+      } else {
+        bubble.innerHTML = formatMessageText(content);
+      }
+
+      if (msgId) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'msg-delete-btn';
+        delBtn.innerText = '🗑 Delete';
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteMessage(msgId, wrapper);
+        };
+        wrapper.appendChild(delBtn);
+      }
+
+      wrapper.appendChild(bubble);
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
     }
 
     async function handleLogin(e) {
@@ -914,6 +1271,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
           currentUser = data.user;
           updateUserProfileUI();
           showView('app-view');
+          startNewChat();
         } else {
           showError('login-error', data.error || 'Invalid email or password.');
         }
@@ -954,6 +1312,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
           currentUser = data.user;
           updateUserProfileUI();
           showView('app-view');
+          startNewChat();
         } else {
           showError('signup-error', data.error || 'Unable to create account.');
         }
@@ -989,6 +1348,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
         await fetch('/api/auth/logout', { method: 'POST' });
       } catch (e) {}
       currentUser = null;
+      currentConversationId = null;
       showView('login-view');
     }
 
@@ -1026,12 +1386,12 @@ HTML_PAGE = r"""<!DOCTYPE html>
       const text = input.value.trim();
       if (!text) return;
 
-      const container = document.getElementById('chat-messages');
+      if (!currentConversationId) {
+        currentConversationId = generateConvId();
+      }
 
-      const userBubble = document.createElement('div');
-      userBubble.className = 'chat-bubble user';
-      userBubble.innerText = text;
-      container.appendChild(userBubble);
+      const container = document.getElementById('chat-messages');
+      appendMessageBubble('user', text, null);
 
       input.value = '';
       container.scrollTop = container.scrollHeight;
@@ -1040,21 +1400,90 @@ HTML_PAGE = r"""<!DOCTYPE html>
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text })
+          body: JSON.stringify({ message: text, conversation_id: currentConversationId })
         });
         const data = await res.json();
 
-        const assistantBubble = document.createElement('div');
-        assistantBubble.className = 'chat-bubble assistant';
-        assistantBubble.innerHTML = formatMessageText(data.reply || 'No response returned.');
-        container.appendChild(assistantBubble);
-        container.scrollTop = container.scrollHeight;
+        if (data.title) {
+          document.getElementById('workspace-title').innerText = data.title;
+          document.getElementById('btn-rename-conv').style.display = 'inline-block';
+          document.getElementById('btn-delete-conv').style.display = 'inline-block';
+        }
+
+        appendMessageBubble('assistant', data.reply || 'No response returned.', null);
+        loadConversationsList();
       } catch (e) {
-        const errBubble = document.createElement('div');
-        errBubble.className = 'chat-bubble assistant';
-        errBubble.innerText = 'Error communicating with NOVAX.';
-        container.appendChild(errBubble);
+        appendMessageBubble('assistant', 'Error communicating with NOVAX.', null);
       }
+    }
+
+    async function deleteConversation(convId, e) {
+      if (e) e.stopPropagation();
+      if (!confirm('Are you sure you want to delete this conversation?')) return;
+
+      try {
+        await fetch('/api/conversations/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: convId })
+        });
+
+        if (currentConversationId === convId) {
+          startNewChat();
+        } else {
+          loadConversationsList();
+        }
+      } catch (err) {}
+    }
+
+    function deleteCurrentConversation() {
+      if (currentConversationId) {
+        deleteConversation(currentConversationId);
+      }
+    }
+
+    async function deleteMessage(msgId, wrapperElement) {
+      try {
+        const res = await fetch('/api/messages/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: msgId })
+        });
+        if (res.ok) {
+          if (wrapperElement) wrapperElement.remove();
+          loadConversationsList();
+        }
+      } catch (e) {}
+    }
+
+    function renameCurrentConversation() {
+      if (!currentConversationId) return;
+      const currentTitle = document.getElementById('workspace-title').innerText;
+      renameConversationPrompt(currentConversationId, currentTitle);
+    }
+
+    async function renameConversationPrompt(convId, oldTitle) {
+      const newTitle = prompt('Enter new heading/title for this conversation:', oldTitle);
+      if (!newTitle || !newTitle.trim() || newTitle.trim() === oldTitle) return;
+
+      try {
+        const res = await fetch('/api/conversations/rename', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: convId, title: newTitle.trim() })
+        });
+        if (res.ok) {
+          if (currentConversationId === convId) {
+            document.getElementById('workspace-title').innerText = newTitle.trim();
+          }
+          loadConversationsList();
+        }
+      } catch (e) {}
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     async function loadMemories() {
@@ -1195,6 +1624,25 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(conversations)
             return
 
+        elif parsed.path == "/api/conversations/messages":
+            user = self._get_authenticated_user()
+            if not user:
+                self._send_json({"error": "Unauthorized"}, status=401)
+                return
+            query = parse_qs(parsed.query)
+            conv_id = query.get("id", [None])[0] or query.get("conversation_id", [None])[0]
+            if not conv_id:
+                self._send_json({"error": "id parameter required"}, status=400)
+                return
+            conv = db.get_conversation(conv_id, user["id"])
+            messages = db.get_conversation_messages(conv_id, user["id"])
+            self._send_json({
+                "id": conv_id,
+                "title": conv["title"] if conv else "Conversation",
+                "messages": messages
+            })
+            return
+
         elif parsed.path == "/api/projects":
             user = self._get_authenticated_user()
             if not user:
@@ -1288,12 +1736,46 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
 
         if parsed.path == "/api/chat":
             message = (data.get("message") or "").strip()
+            conv_id = data.get("conversation_id")
             if not message:
                 self._send_json({"error": "message is required"}, status=400)
                 return
 
-            response = self.server.brain.get_response(message, user_id=user["id"], user_name=user["name"])
-            self._send_json({"reply": response})
+            response = self.server.brain.get_response(message, user_id=user["id"], user_name=user["name"], conversation_id=conv_id)
+            conv = db.get_conversation(conv_id, user["id"]) if conv_id else None
+            self._send_json({
+                "reply": response,
+                "conversation_id": conv_id,
+                "title": conv["title"] if conv else "New Chat"
+            })
+            return
+
+        elif parsed.path == "/api/conversations/delete":
+            conv_id = data.get("id") or data.get("conversation_id")
+            if not conv_id:
+                self._send_json({"error": "id is required"}, status=400)
+                return
+            db.delete_user_conversation(conv_id, user["id"])
+            self._send_json({"success": True})
+            return
+
+        elif parsed.path == "/api/conversations/rename":
+            conv_id = data.get("id") or data.get("conversation_id")
+            title = (data.get("title") or "").strip()
+            if not conv_id or not title:
+                self._send_json({"error": "id and title are required"}, status=400)
+                return
+            db.update_conversation_title(conv_id, user["id"], title)
+            self._send_json({"success": True})
+            return
+
+        elif parsed.path == "/api/messages/delete":
+            msg_id = data.get("id") or data.get("message_id")
+            if not msg_id:
+                self._send_json({"error": "id is required"}, status=400)
+                return
+            db.delete_message(msg_id, user["id"])
+            self._send_json({"success": True})
             return
 
         elif parsed.path == "/api/memory":
