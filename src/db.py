@@ -8,6 +8,30 @@ from contextlib import contextmanager
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "novax.db"
 OLD_MEMORY_PATH = Path(__file__).resolve().parent.parent / "data" / "memory.json"
 
+class MemoryValue(str):
+    def __new__(cls, value, source="USER", created_at=0, updated_at=0):
+        val_str = str(value) if value is not None else ""
+        obj = super().__new__(cls, val_str)
+        obj.value = val_str
+        obj.source = source
+        obj.created_at = created_at
+        obj.updated_at = updated_at
+        return obj
+
+    def get(self, key, default=None):
+        if key == "value": return self.value
+        if key == "source": return self.source
+        if key == "created_at": return self.created_at
+        if key == "updated_at": return self.updated_at
+        return default
+
+    def __getitem__(self, item):
+        if item == "value": return self.value
+        if item == "source": return self.source
+        if item == "created_at": return self.created_at
+        if item == "updated_at": return self.updated_at
+        return super().__getitem__(item)
+
 class Database:
     def __init__(self, db_path=None):
         self.db_path = Path(db_path) if db_path else DB_PATH
@@ -59,11 +83,21 @@ class Database:
                     category TEXT NOT NULL,
                     key TEXT NOT NULL,
                     value TEXT NOT NULL,
+                    source TEXT DEFAULT 'USER',
+                    created_at REAL DEFAULT 0,
                     updated_at REAL NOT NULL,
                     UNIQUE(user_id, category, key),
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 )
             """)
+
+            # Dynamic column migration for existing databases
+            cursor.execute("PRAGMA table_info(memories)")
+            columns = [col[1] for col in cursor.fetchall()]
+            if "source" not in columns:
+                cursor.execute("ALTER TABLE memories ADD COLUMN source TEXT DEFAULT 'USER'")
+            if "created_at" not in columns:
+                cursor.execute("ALTER TABLE memories ADD COLUMN created_at REAL DEFAULT 0")
 
             # Conversations table
             cursor.execute("""
@@ -210,16 +244,19 @@ class Database:
     def get_user_memories(self, user_id):
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT category, key, value FROM memories WHERE user_id = ?", (user_id,))
+            cursor.execute("SELECT category, key, value, source, created_at, updated_at FROM memories WHERE user_id = ? ORDER BY updated_at DESC", (user_id,))
             rows = cursor.fetchall()
             result = {}
             for row in rows:
                 cat = row["category"]
                 k = row["key"]
                 v = row["value"]
+                src = row["source"] or "USER"
+                c_at = row["created_at"] or row["updated_at"]
+                u_at = row["updated_at"]
                 if cat not in result:
                     result[cat] = {}
-                result[cat][k] = v
+                result[cat][k] = MemoryValue(v, source=src, created_at=c_at, updated_at=u_at)
             return result
 
     def get_memory(self, user_id, category, key):
@@ -229,13 +266,18 @@ class Database:
             row = cursor.fetchone()
             return row["value"] if row else None
 
-    def set_memory(self, user_id, category, key, value):
+    def set_memory(self, user_id, category, key, value, source="USER"):
         with self.get_connection() as conn:
             cursor = conn.cursor()
+            now = time.time()
+            cursor.execute("SELECT created_at FROM memories WHERE user_id = ? AND category = ? AND key = ?", (user_id, category, key))
+            existing = cursor.fetchone()
+            created_at = existing["created_at"] if existing and existing["created_at"] else now
+
             cursor.execute("""
-                INSERT OR REPLACE INTO memories (user_id, category, key, value, updated_at)
-                VALUES (?, ?, ?, ?, ?)
-            """, (user_id, category, key, str(value), time.time()))
+                INSERT OR REPLACE INTO memories (user_id, category, key, value, source, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (user_id, category, key, str(value), source, created_at, now))
             conn.commit()
 
     def delete_memory(self, user_id, category, key):
@@ -243,6 +285,24 @@ class Database:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM memories WHERE user_id = ? AND category = ? AND key = ?", (user_id, category, key))
             conn.commit()
+
+    def clear_user_memories(self, user_id):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM memories WHERE user_id = ?", (user_id,))
+            conn.commit()
+
+    def search_user_memories(self, user_id, query):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            q = f"%{query.strip().lower()}%"
+            cursor.execute("""
+                SELECT category, key, value, source, created_at, updated_at
+                FROM memories
+                WHERE user_id = ? AND (LOWER(key) LIKE ? OR LOWER(value) LIKE ? OR LOWER(category) LIKE ?)
+                ORDER BY updated_at DESC
+            """, (user_id, q, q, q))
+            return [dict(row) for row in cursor.fetchall()]
 
     # --- Conversation queries ---
     def get_user_conversations(self, user_id):

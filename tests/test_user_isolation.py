@@ -15,8 +15,17 @@ class UserIsolationTests(unittest.TestCase):
         self.db_path = self.db_file.name
         self.db_file.close()
 
-        # Patch db singleton to use test database
-        auth.db = Database(self.db_path)
+        test_db = Database(self.db_path)
+        auth.db = test_db
+        import src.db
+        import src.memory
+        import src.brain
+        import src.conversation
+        src.db.db = test_db
+        src.memory.db = test_db
+        src.brain.db = test_db
+        src.conversation.db = test_db
+
         self.brain = Brain()
         self.brain.memory = MemoryManager()
 

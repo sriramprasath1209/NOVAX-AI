@@ -62,6 +62,26 @@ class Brain:
 
         tabular_requested = any(kw in lower for kw in tabular_requests)
 
+        # Fetch user preferences
+        length_pref = self.memory.get("preferences", "length", user_id=user_id)
+        style_pref = self.memory.get("preferences", "style", user_id=user_id)
+        tone_pref = self.memory.get("preferences", "tone", user_id=user_id)
+        formatting_pref = self.memory.get("preferences", "formatting", user_id=user_id)
+        lang_pref = self.memory.get("preferences", "programming_language", user_id=user_id)
+        notes_pref = self.memory.get("preferences", "additional_notes", user_id=user_id)
+
+        pref_lines = []
+        if length_pref: pref_lines.append(f"- Preferred Response Length: {length_pref}")
+        if style_pref: pref_lines.append(f"- Preferred Explanation Style: {style_pref}")
+        if tone_pref: pref_lines.append(f"- Preferred Tone: {tone_pref}")
+        if formatting_pref: pref_lines.append(f"- Preferred Formatting: {formatting_pref}")
+        if lang_pref: pref_lines.append(f"- Preferred Programming Language: {lang_pref}")
+        if notes_pref: pref_lines.append(f"- Additional User Preferences: {notes_pref}")
+
+        prefs_text = ""
+        if pref_lines:
+            prefs_text = "\n\n[User Personalized Response Preferences]\n" + "\n".join(pref_lines) + "\nPlease align your answers with these preferences."
+
         # Build authenticated user context system message
         user_context_message = {
             "role": "system",
@@ -72,6 +92,7 @@ class Brain:
                 f"Product Identity: You are NOVAX-AI, an intelligent personal AI agent created by Sriram Prasath. "
                 f"You are currently assisting {user_name}. If asked 'who created NOVAX' or 'who made you', answer Sriram Prasath. "
                 f"If asked 'what is my name' or 'who am I', answer that their name is {user_name}."
+                f"{prefs_text}"
             )
         }
 

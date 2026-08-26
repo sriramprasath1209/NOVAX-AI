@@ -740,6 +740,278 @@ HTML_PAGE = r"""<!DOCTYPE html>
       display: flex;
       gap: 8px;
     }
+
+    /* Memory Center Styling */
+    .memory-center-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-bottom: 40px;
+    }
+
+    .memory-header-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(34, 211, 238, 0.08) 100%);
+      border: 1px solid var(--novax-nav-active-border);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .memory-stat-chip {
+      background: var(--novax-surface-secondary);
+      border: 1px solid var(--novax-border);
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--novax-text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .memory-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 18px;
+      padding: 24px;
+      transition: all 0.2s ease;
+    }
+
+    .memory-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .memory-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .memory-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--novax-cyan);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .memory-field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .memory-field-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(17, 24, 39, 0.4);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--novax-border-light);
+    }
+
+    .memory-field-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--novax-muted);
+    }
+
+    .memory-field-val {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--novax-text);
+      word-break: break-word;
+    }
+
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .mem-chip {
+      background: rgba(99, 102, 241, 0.18);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: var(--novax-text);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mem-chip-del {
+      background: transparent;
+      border: none;
+      color: var(--novax-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 2px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .mem-chip-del:hover {
+      color: var(--novax-error);
+    }
+
+    .source-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    .source-badge.USER {
+      background: rgba(99, 102, 241, 0.25);
+      color: #818CF8;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+    }
+    .source-badge.CONVERSATION {
+      background: rgba(34, 211, 238, 0.2);
+      color: var(--novax-cyan);
+      border: 1px solid rgba(34, 211, 238, 0.4);
+    }
+    .source-badge.SYSTEM {
+      background: rgba(139, 92, 246, 0.25);
+      color: #C084FC;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+    }
+
+    .pref-option-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .pref-radio-label {
+      background: var(--novax-surface-secondary);
+      border: 1px solid var(--novax-border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--novax-text-secondary);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pref-radio-label.selected {
+      background: var(--novax-nav-active-bg);
+      border-color: var(--novax-primary);
+      color: var(--novax-text);
+      font-weight: 600;
+    }
+
+    .wizard-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(4, 6, 12, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .wizard-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 540px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Thinking Indicator Styling */
+    .thinking-bubble {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--novax-cyan);
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .thinking-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .thinking-pulse-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--novax-cyan);
+      border-radius: 50%;
+      display: inline-block;
+      animation: thinkingPulse 1.4s infinite ease-in-out both;
+    }
+
+    .thinking-pulse-dot:nth-child(1) { animation-delay: -0.32s; }
+    .thinking-pulse-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    /* Task Filter Buttons & Card Styles */
+    .task-filter-btn {
+      background: var(--novax-surface-secondary);
+      border: 1px solid var(--novax-border);
+      color: var(--novax-text-secondary);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .task-filter-btn.active {
+      background: var(--novax-nav-active-bg);
+      border-color: var(--novax-primary);
+      color: var(--novax-text);
+      font-weight: 600;
+    }
+    .task-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--novax-primary);
+    }
+    .task-card.completed {
+      opacity: 0.7;
+    }
+    .task-card.completed .task-title {
+      text-decoration: line-through;
+      color: var(--novax-muted);
+    }
   </style>
 </head>
 <body>
@@ -894,35 +1166,35 @@ HTML_PAGE = r"""<!DOCTYPE html>
         <div class="nav-section">
           <div class="nav-section-title">Workspace</div>
           <div class="nav-item active" id="nav-item-conversations-panel" onclick="showPanel('conversations-panel')">
-            <span>◉ Conversations</span>
+            <span>Conversations</span>
           </div>
           <div class="nav-item" id="nav-item-chat" onclick="showPanel('chat-panel')">
-            <span>💬 Active Chat</span>
+            <span>Active Chat</span>
           </div>
           <div class="nav-item" onclick="showPanel('memory-panel')">
-            <span>🧠 Memory</span>
+            <span>Memory</span>
           </div>
           <div class="nav-item" onclick="showPanel('projects-panel')">
-            <span>📁 Projects</span>
+            <span>Projects</span>
           </div>
         </div>
 
         <div class="nav-section">
           <div class="nav-section-title">Agent Tools</div>
           <div class="nav-item" onclick="alert('Tools section is active.')">
-            <span>🛠 Tools</span>
+            <span>Tools</span>
           </div>
           <div class="nav-item" onclick="showPanel('tasks-panel')">
-            <span>📋 Tasks</span>
+            <span>Tasks</span>
           </div>
           <div class="nav-item" onclick="alert('Automations feature enabled.')">
-            <span>🔔 Automations</span>
+            <span>Automations</span>
           </div>
         </div>
 
         <div class="nav-section">
           <div class="nav-item" onclick="alert('Settings view loaded.')">
-            <span>⚙ Settings</span>
+            <span>Settings</span>
           </div>
         </div>
 
@@ -942,14 +1214,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       <!-- Main Content -->
       <main class="main-workspace">
         <div class="workspace-header">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div id="workspace-title" class="workspace-title">Personal AI Assistant</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <button class="btn-logout" id="btn-rename-conv" onclick="renameCurrentConversation()" style="display:none; color:var(--novax-cyan);">✏ Rename</button>
-            <button class="btn-logout" id="btn-delete-conv" onclick="deleteCurrentConversation()" style="display:none; color:#FCA5A5; border-color:rgba(239,68,68,0.3);">🗑 Delete Chat</button>
-            <button class="btn-primary" onclick="startNewChat()" style="padding:6px 14px; font-size:13px; width:auto;">＋ New Chat</button>
-          </div>
+          <div id="workspace-title" class="workspace-title">Personal AI Assistant</div>
         </div>
 
         <!-- Chat Panel -->
@@ -979,11 +1244,73 @@ HTML_PAGE = r"""<!DOCTYPE html>
           <div id="conversations-grid" class="card-grid"></div>
         </div>
 
-        <!-- Memory Panel -->
+        <!-- Personal Memory Center Panel -->
         <div id="memory-panel" class="panel-view">
-          <h2 style="color:var(--novax-cyan); margin-top:0;">Your Personal Memory Space</h2>
-          <p style="color:var(--novax-muted); font-size:14px;">Memories stored here are completely isolated to your personal NOVAX account.</p>
-          <div id="memory-grid" class="card-grid"></div>
+          <div class="memory-center-wrapper">
+
+            <!-- Banner Header -->
+            <div class="memory-header-banner">
+              <div>
+                <h1 style="font-size:24px; font-weight:800; color:var(--novax-text); margin:0 0 6px 0; display:flex; align-items:center; gap:10px;">
+                  Personalize NOVAX
+                </h1>
+                <p style="color:var(--novax-text-secondary); font-size:14px; margin:0;">
+                  Help NOVAX understand you better by adding information about yourself. You control what NOVAX remembers.
+                </p>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <button class="btn-primary" onclick="startPersonalizationWizard()" style="padding:10px 18px; width:auto;">
+                  Start Personalization
+                </button>
+              </div>
+            </div>
+
+            <!-- Top Summary & Search Bar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+              <div id="memory-summary-bar" style="display:flex; gap:10px; flex-wrap:wrap;">
+                <div class="memory-stat-chip">Memories: <strong id="total-memory-count" style="color:var(--novax-cyan);">0</strong> items</div>
+                <div class="memory-stat-chip">Status: <strong style="color:var(--novax-success);">User Isolated</strong></div>
+              </div>
+              <div style="position:relative; width:280px;">
+                <input type="text" id="memory-search-input" class="form-control" placeholder="Search your memories..." oninput="onMemorySearchInput(this.value)" />
+              </div>
+            </div>
+
+            <!-- Main Memory Categories Container -->
+            <div id="memory-categories-container" style="display:flex; flex-direction:column; gap:20px;"></div>
+
+            <!-- Dangerous Action: Memory Management -->
+            <div class="memory-card" style="border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.04);">
+              <div class="memory-card-header" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+                <div>
+                  <h3 class="memory-card-title" style="color:#FCA5A5;">Memory Management</h3>
+                  <p style="color:var(--novax-muted); font-size:13px; margin:4px 0 0 0;">Permanently remove your saved personal memories from NOVAX-AI.</p>
+                </div>
+                <button class="btn-logout" onclick="clearAllMemoriesConfirm()" style="color:#FCA5A5; border-color:rgba(239,68,68,0.4); padding:8px 16px;">
+                  Clear All Memories
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- First-Time Personalization Wizard Modal -->
+        <div id="wizard-modal" class="wizard-overlay">
+          <div class="wizard-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h2 style="color:var(--novax-cyan); margin:0; font-size:20px;">Let's Personalize NOVAX</h2>
+              <span id="wizard-step-indicator" style="font-size:12px; color:var(--novax-muted);">Step 1 of 6</span>
+            </div>
+            <p style="color:var(--novax-text-secondary); font-size:14px; margin-bottom:20px;">
+              You can tell NOVAX about yourself so it can give you more relevant answers. You can skip any step.
+            </p>
+            <div id="wizard-step-body"></div>
+            <div style="display:flex; justify-content:space-between; margin-top:24px;">
+              <button class="btn-logout" onclick="skipWizardStep()">Skip</button>
+              <button class="btn-primary" id="btn-wizard-next" onclick="nextWizardStep()" style="width:auto; padding:10px 20px;">Next Step →</button>
+            </div>
+          </div>
         </div>
 
         <!-- Projects Panel -->
@@ -1000,14 +1327,24 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
         <!-- Tasks Panel -->
         <div id="tasks-panel" class="panel-view">
-          <h2 style="color:var(--novax-cyan); margin-top:0;">Your Personal Tasks</h2>
-          <p style="color:var(--novax-muted); font-size:14px;">Manage your daily priorities safely.</p>
-          <div id="tasks-grid" class="card-grid">
-            <div class="data-card">
-              <h3>Personal AI Setup</h3>
-              <p>Configure personal preferences and memories in NOVAX.</p>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h2 style="color:var(--novax-cyan); margin:0;">Your Personal Tasks</h2>
+              <p style="color:var(--novax-muted); font-size:14px; margin:4px 0 0 0;">Manage your daily priorities safely.</p>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <input type="text" id="search-tasks-input" class="form-control" style="width:220px;" placeholder="Search tasks..." oninput="filterTasks()" />
+              <button class="btn-primary" onclick="promptCreateTask()" style="width:auto; padding:8px 16px;">+ Add Task</button>
             </div>
           </div>
+
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="task-filter-btn active" id="task-filter-all" onclick="setTaskFilter('all')">All</button>
+            <button class="task-filter-btn" id="task-filter-pending" onclick="setTaskFilter('pending')">Pending</button>
+            <button class="task-filter-btn" id="task-filter-completed" onclick="setTaskFilter('completed')">Completed</button>
+          </div>
+
+          <div id="tasks-grid" class="card-grid"></div>
         </div>
 
       </main>
@@ -1045,6 +1382,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
         loadConversationsList();
       } else if (panelId === 'memory-panel') {
         loadMemories();
+      } else if (panelId === 'tasks-panel') {
+        loadTasks();
       }
     }
 
@@ -1086,9 +1425,6 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
     function startNewChat() {
       currentConversationId = generateConvId();
-      document.getElementById('workspace-title').innerText = 'New Chat';
-      document.getElementById('btn-rename-conv').style.display = 'none';
-      document.getElementById('btn-delete-conv').style.display = 'none';
 
       const container = document.getElementById('chat-messages');
       container.innerHTML = `
@@ -1193,9 +1529,6 @@ HTML_PAGE = r"""<!DOCTYPE html>
         const data = await res.json();
 
         currentConversationId = convId;
-        document.getElementById('workspace-title').innerText = data.title || 'Conversation';
-        document.getElementById('btn-rename-conv').style.display = 'inline-block';
-        document.getElementById('btn-delete-conv').style.display = 'inline-block';
 
         const container = document.getElementById('chat-messages');
         container.innerHTML = '';
@@ -1396,6 +1729,25 @@ HTML_PAGE = r"""<!DOCTYPE html>
       input.value = '';
       container.scrollTop = container.scrollHeight;
 
+      // Show NOVAX Thinking Indicator
+      const thinkingWrapper = document.createElement('div');
+      thinkingWrapper.className = 'chat-bubble-wrapper assistant';
+      thinkingWrapper.id = 'thinking-bubble-active';
+      thinkingWrapper.innerHTML = `
+        <div class="chat-bubble assistant">
+          <span class="thinking-bubble">
+            <span>NOVAX is thinking</span>
+            <span class="thinking-dots">
+              <span class="thinking-pulse-dot"></span>
+              <span class="thinking-pulse-dot"></span>
+              <span class="thinking-pulse-dot"></span>
+            </span>
+          </span>
+        </div>
+      `;
+      container.appendChild(thinkingWrapper);
+      container.scrollTop = container.scrollHeight;
+
       try {
         const res = await fetch('/api/chat', {
           method: 'POST',
@@ -1404,15 +1756,16 @@ HTML_PAGE = r"""<!DOCTYPE html>
         });
         const data = await res.json();
 
-        if (data.title) {
-          document.getElementById('workspace-title').innerText = data.title;
-          document.getElementById('btn-rename-conv').style.display = 'inline-block';
-          document.getElementById('btn-delete-conv').style.display = 'inline-block';
-        }
+        // Remove thinking indicator
+        const activeThinking = document.getElementById('thinking-bubble-active');
+        if (activeThinking) activeThinking.remove();
 
         appendMessageBubble('assistant', data.reply || 'No response returned.', null);
         loadConversationsList();
       } catch (e) {
+        const activeThinking = document.getElementById('thinking-bubble-active');
+        if (activeThinking) activeThinking.remove();
+
         appendMessageBubble('assistant', 'Error communicating with NOVAX.', null);
       }
     }
@@ -1458,8 +1811,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
     function renameCurrentConversation() {
       if (!currentConversationId) return;
-      const currentTitle = document.getElementById('workspace-title').innerText;
-      renameConversationPrompt(currentConversationId, currentTitle);
+      renameConversationPrompt(currentConversationId, "");
     }
 
     async function renameConversationPrompt(convId, oldTitle) {
@@ -1473,9 +1825,6 @@ HTML_PAGE = r"""<!DOCTYPE html>
           body: JSON.stringify({ id: convId, title: newTitle.trim() })
         });
         if (res.ok) {
-          if (currentConversationId === convId) {
-            document.getElementById('workspace-title').innerText = newTitle.trim();
-          }
           loadConversationsList();
         }
       } catch (e) {}
@@ -1486,28 +1835,692 @@ HTML_PAGE = r"""<!DOCTYPE html>
       return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
+    let currentMemoriesData = {};
+    let wizardCurrentStep = 1;
+
     async function loadMemories() {
       try {
         const res = await fetch('/api/memory');
-        const memories = await res.json();
-        const grid = document.getElementById('memory-grid');
-        grid.innerHTML = '';
-
-        let count = 0;
-        for (const [cat, items] of Object.entries(memories)) {
-          for (const [key, val] of Object.entries(items)) {
-            count++;
-            const card = document.createElement('div');
-            card.className = 'data-card';
-            card.innerHTML = `<h3>${key}</h3><p><strong>${cat.toUpperCase()}:</strong> ${val}</p>`;
-            grid.appendChild(card);
-          }
-        }
-
-        if (count === 0) {
-          grid.innerHTML = `<div class="data-card"><p>No personal memories saved yet.</p></div>`;
-        }
+        if (!res.ok) return;
+        currentMemoriesData = await res.json() || {};
+        renderMemoryCenter(currentMemoriesData);
       } catch (e) {}
+    }
+
+    function renderMemoryCenter(memories, filterQuery = '') {
+      const container = document.getElementById('memory-categories-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let totalItems = 0;
+
+      const categories = [
+        { id: 'profile', title: 'Profile' },
+        { id: 'education', title: 'Education' },
+        { id: 'career', title: 'Career & Skills' },
+        { id: 'interests', title: 'Interests' },
+        { id: 'goals', title: 'Goals' },
+        { id: 'preferences', title: 'Response Preferences' },
+        { id: 'projects', title: 'Projects' },
+        { id: 'routines', title: 'Routines' },
+        { id: 'custom', title: 'Custom Memories' }
+      ];
+
+      Object.keys(memories).forEach(cat => {
+        if (memories[cat]) {
+          totalItems += Object.keys(memories[cat]).length;
+        }
+      });
+      document.getElementById('total-memory-count').innerText = totalItems;
+
+      const q = filterQuery.toLowerCase().trim();
+
+      categories.forEach(catConfig => {
+        const catData = memories[catConfig.id] || memories[catConfig.id.toLowerCase()] || {};
+        const itemsCount = Object.keys(catData).length;
+
+        if (q) {
+          const catText = (catConfig.title + ' ' + JSON.stringify(catData)).toLowerCase();
+          if (!catText.includes(q)) return;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'memory-card';
+
+        let bodyHtml = '';
+        if (catConfig.id === 'profile') bodyHtml = renderProfileCategoryHtml(catData);
+        else if (catConfig.id === 'education') bodyHtml = renderEducationCategoryHtml(catData);
+        else if (catConfig.id === 'career') bodyHtml = renderCareerSkillsCategoryHtml(catData);
+        else if (catConfig.id === 'interests') bodyHtml = renderInterestsCategoryHtml(catData);
+        else if (catConfig.id === 'goals') bodyHtml = renderGoalsCategoryHtml(catData);
+        else if (catConfig.id === 'preferences') bodyHtml = renderPreferencesCategoryHtml(catData);
+        else if (catConfig.id === 'projects') bodyHtml = renderProjectsCategoryHtml(catData);
+        else if (catConfig.id === 'routines') bodyHtml = renderRoutinesCategoryHtml(catData);
+        else bodyHtml = renderCustomCategoryHtml(catData);
+
+        card.innerHTML = `
+          <div class="memory-card-header">
+            <h3 class="memory-card-title">${catConfig.title}</h3>
+            <span style="font-size:12px; color:var(--novax-muted); font-weight:600;">${itemsCount} item${itemsCount === 1 ? '' : 's'}</span>
+          </div>
+          <div>${bodyHtml}</div>
+        `;
+        container.appendChild(card);
+      });
+
+      if (container.children.length === 0 && q) {
+        container.innerHTML = `<div class="memory-card"><p style="color:var(--novax-muted); text-align:center; margin:0;">No memories found matching "${escapeHtml(q)}".</p></div>`;
+      }
+    }
+
+    function getVal(data, key, defaultVal = '') {
+      if (!data || !data[key]) return defaultVal;
+      return data[key].value || data[key] || defaultVal;
+    }
+
+    function renderProfileCategoryHtml(data) {
+      const name = getVal(data, 'name');
+      const prefName = getVal(data, 'preferred_name');
+      const pronouns = getVal(data, 'pronouns');
+      const ageRange = getVal(data, 'age_range');
+      const country = getVal(data, 'country');
+      const city = getVal(data, 'city');
+      const timezone = getVal(data, 'timezone');
+      const language = getVal(data, 'language');
+
+      if (!name && !country && !timezone && !language) {
+        return `
+          <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">NOVAX doesn't know about your profile details yet.</p>
+          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="promptEditProfile()">+ Add Profile Info</button>
+        `;
+      }
+
+      return `
+        <div class="memory-field-grid">
+          <div class="memory-field-item"><span class="memory-field-label">Full Name</span><span class="memory-field-val">${escapeHtml(name || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Preferred Name</span><span class="memory-field-val">${escapeHtml(prefName || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Pronouns</span><span class="memory-field-val">${escapeHtml(pronouns || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Age Range</span><span class="memory-field-val">${escapeHtml(ageRange || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Country</span><span class="memory-field-val">${escapeHtml(country || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">City</span><span class="memory-field-val">${escapeHtml(city || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Timezone</span><span class="memory-field-val">${escapeHtml(timezone || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Preferred Language</span><span class="memory-field-val">${escapeHtml(language || 'Not specified')}</span></div>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditProfile()">Edit Profile</button>
+        </div>
+      `;
+    }
+
+    async function promptEditProfile() {
+      const data = currentMemoriesData['profile'] || {};
+      const name = prompt('Full Name:', getVal(data, 'name'));
+      if (name !== null) await saveMemoryItem('profile', 'name', name.trim());
+      const prefName = prompt('Preferred Name:', getVal(data, 'preferred_name'));
+      if (prefName !== null) await saveMemoryItem('profile', 'preferred_name', prefName.trim());
+      const country = prompt('Country:', getVal(data, 'country'));
+      if (country !== null) await saveMemoryItem('profile', 'country', country.trim());
+      const timezone = prompt('Timezone (e.g. Asia/Kolkata):', getVal(data, 'timezone'));
+      if (timezone !== null) await saveMemoryItem('profile', 'timezone', timezone.trim());
+      const language = prompt('Preferred Language:', getVal(data, 'language'));
+      if (language !== null) await saveMemoryItem('profile', 'language', language.trim());
+      loadMemories();
+    }
+
+    function renderEducationCategoryHtml(data) {
+      const status = getVal(data, 'status');
+      const institution = getVal(data, 'institution');
+      const course = getVal(data, 'course');
+      const field = getVal(data, 'field');
+      const year = getVal(data, 'year');
+      const subjectsStr = getVal(data, 'subjects');
+
+      const subjects = subjectsStr ? subjectsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      if (!status && !institution && !course) {
+        return `
+          <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">NOVAX doesn't know about your education yet.</p>
+          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="promptEditEducation()">+ Add Education</button>
+        `;
+      }
+
+      let chipHtml = subjects.map(s => `
+        <span class="mem-chip">
+          ${escapeHtml(s)}
+          <button class="mem-chip-del" onclick="removeSubjectChip('${escapeHtml(s).replace(/'/g, "\\'")}')">✕</button>
+        </span>
+      `).join('');
+
+      return `
+        <div class="memory-field-grid" style="margin-bottom:12px;">
+          <div class="memory-field-item"><span class="memory-field-label">Status</span><span class="memory-field-val">${escapeHtml(status || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Institution</span><span class="memory-field-val">${escapeHtml(institution || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Degree / Course</span><span class="memory-field-val">${escapeHtml(course || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Field of Study</span><span class="memory-field-val">${escapeHtml(field || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Current Year</span><span class="memory-field-val">${escapeHtml(year || 'Not specified')}</span></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span class="memory-field-label">Subjects</span>
+          <div class="chip-container">${chipHtml || '<span style="font-size:13px; color:var(--novax-muted);">No subjects added yet.</span>'}</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditEducation()">Edit Education</button>
+          <button class="btn-logout" style="color:var(--novax-primary); padding:6px 14px; font-size:13px;" onclick="addSubjectPrompt()">+ Add Subject</button>
+        </div>
+      `;
+    }
+
+    async function promptEditEducation() {
+      const data = currentMemoriesData['education'] || {};
+      const status = prompt('Education Status (e.g. Student, Graduate):', getVal(data, 'status'));
+      if (status !== null) await saveMemoryItem('education', 'status', status.trim());
+      const institution = prompt('Institution / University:', getVal(data, 'institution'));
+      if (institution !== null) await saveMemoryItem('education', 'institution', institution.trim());
+      const course = prompt('Degree / Course (e.g. B.Tech):', getVal(data, 'course'));
+      if (course !== null) await saveMemoryItem('education', 'course', course.trim());
+      const field = prompt('Field of Study (e.g. Computer Science):', getVal(data, 'field'));
+      if (field !== null) await saveMemoryItem('education', 'field', field.trim());
+      const year = prompt('Current Year (e.g. 2nd Year):', getVal(data, 'year'));
+      if (year !== null) await saveMemoryItem('education', 'year', year.trim());
+      loadMemories();
+    }
+
+    async function addSubjectPrompt() {
+      const s = prompt('Enter subject name:');
+      if (!s || !s.trim()) return;
+      const data = currentMemoriesData['education'] || {};
+      let existing = getVal(data, 'subjects');
+      let list = existing ? existing.split(',').map(x => x.trim()).filter(Boolean) : [];
+      if (!list.includes(s.trim())) {
+        list.push(s.trim());
+        await saveMemoryItem('education', 'subjects', list.join(', '));
+        loadMemories();
+      }
+    }
+
+    async function removeSubjectChip(sub) {
+      const data = currentMemoriesData['education'] || {};
+      let existing = getVal(data, 'subjects');
+      let list = existing ? existing.split(',').map(x => x.trim()).filter(x => x !== sub) : [];
+      await saveMemoryItem('education', 'subjects', list.join(', '));
+      loadMemories();
+    }
+
+    function renderCareerSkillsCategoryHtml(data) {
+      const occupation = getVal(data, 'occupation');
+      const experience = getVal(data, 'experience');
+      const targetRole = getVal(data, 'target_role');
+      const careerGoal = getVal(data, 'career_goal');
+      const techSkillsStr = getVal(data, 'tech_skills');
+
+      const techSkills = techSkillsStr ? techSkillsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      let chipsHtml = techSkills.map(s => `
+        <span class="mem-chip">
+          ${escapeHtml(s)}
+          <button class="mem-chip-del" onclick="removeTechSkillChip('${escapeHtml(s).replace(/'/g, "\\'")}')">✕</button>
+        </span>
+      `).join('');
+
+      return `
+        <div class="memory-field-grid" style="margin-bottom:12px;">
+          <div class="memory-field-item"><span class="memory-field-label">Occupation</span><span class="memory-field-val">${escapeHtml(occupation || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Experience Level</span><span class="memory-field-val">${escapeHtml(experience || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Target Role</span><span class="memory-field-val">${escapeHtml(targetRole || 'Not specified')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Career Goal</span><span class="memory-field-val">${escapeHtml(careerGoal || 'Not specified')}</span></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span class="memory-field-label">Technical & Soft Skills</span>
+          <div class="chip-container">${chipsHtml || '<span style="font-size:13px; color:var(--novax-muted);">No skills added yet.</span>'}</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditCareer()">Edit Career Info</button>
+          <button class="btn-logout" style="color:var(--novax-primary); padding:6px 14px; font-size:13px;" onclick="addSkillPrompt()">+ Add Skill</button>
+        </div>
+      `;
+    }
+
+    async function promptEditCareer() {
+      const data = currentMemoriesData['career'] || {};
+      const occ = prompt('Occupation:', getVal(data, 'occupation'));
+      if (occ !== null) await saveMemoryItem('career', 'occupation', occ.trim());
+      const exp = prompt('Experience Level (e.g. Beginner, Intermediate, Senior):', getVal(data, 'experience'));
+      if (exp !== null) await saveMemoryItem('career', 'experience', exp.trim());
+      const role = prompt('Target Role (e.g. AI Engineer):', getVal(data, 'target_role'));
+      if (role !== null) await saveMemoryItem('career', 'target_role', role.trim());
+      const goal = prompt('Career Goal:', getVal(data, 'career_goal'));
+      if (goal !== null) await saveMemoryItem('career', 'career_goal', goal.trim());
+      loadMemories();
+    }
+
+    async function addSkillPrompt() {
+      const s = prompt('Enter skill (e.g. Python, Git, DSA, React):');
+      if (!s || !s.trim()) return;
+      const data = currentMemoriesData['career'] || {};
+      let existing = getVal(data, 'tech_skills');
+      let list = existing ? existing.split(',').map(x => x.trim()).filter(Boolean) : [];
+      if (!list.includes(s.trim())) {
+        list.push(s.trim());
+        await saveMemoryItem('career', 'tech_skills', list.join(', '));
+        loadMemories();
+      }
+    }
+
+    async function removeTechSkillChip(sk) {
+      const data = currentMemoriesData['career'] || {};
+      let existing = getVal(data, 'tech_skills');
+      let list = existing ? existing.split(',').map(x => x.trim()).filter(x => x !== sk) : [];
+      await saveMemoryItem('career', 'tech_skills', list.join(', '));
+      loadMemories();
+    }
+
+    function renderInterestsCategoryHtml(data) {
+      const itemsStr = getVal(data, 'interests_list');
+      const interests = itemsStr ? itemsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      let chipsHtml = interests.map(s => `
+        <span class="mem-chip">
+          ${escapeHtml(s)}
+          <button class="mem-chip-del" onclick="removeInterestChip('${escapeHtml(s).replace(/'/g, "\\'")}')">✕</button>
+        </span>
+      `).join('');
+
+      return `
+        <div style="margin-bottom:12px;">
+          <span class="memory-field-label">Hobbies, Topics & Technologies</span>
+          <div class="chip-container">${chipsHtml || '<span style="font-size:13px; color:var(--novax-muted);">No interests added yet.</span>'}</div>
+        </div>
+        <div>
+          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="addInterestPrompt()">+ Add Interest</button>
+        </div>
+      `;
+    }
+
+    async function addInterestPrompt() {
+      const s = prompt('Enter interest / topic / hobby (e.g. Artificial Intelligence, Programming, Hackathons):');
+      if (!s || !s.trim()) return;
+      const data = currentMemoriesData['interests'] || {};
+      let existing = getVal(data, 'interests_list');
+      let list = existing ? existing.split(',').map(x => x.trim()).filter(Boolean) : [];
+      if (!list.includes(s.trim())) {
+        list.push(s.trim());
+        await saveMemoryItem('interests', 'interests_list', list.join(', '));
+        loadMemories();
+      }
+    }
+
+    async function removeInterestChip(item) {
+      const data = currentMemoriesData['interests'] || {};
+      let existing = getVal(data, 'interests_list');
+      let list = existing ? existing.split(',').map(x => x.trim()).filter(x => x !== item) : [];
+      await saveMemoryItem('interests', 'interests_list', list.join(', '));
+      loadMemories();
+    }
+
+    function renderGoalsCategoryHtml(data) {
+      const shortTerm = getVal(data, 'short_term');
+      const longTerm = getVal(data, 'long_term');
+
+      return `
+        <div class="memory-field-grid" style="margin-bottom:12px;">
+          <div class="memory-field-item">
+            <span class="memory-field-label">Short-Term Goals</span>
+            <span class="memory-field-val">${escapeHtml(shortTerm || 'Not specified')}</span>
+          </div>
+          <div class="memory-field-item">
+            <span class="memory-field-label">Long-Term Goals</span>
+            <span class="memory-field-val">${escapeHtml(longTerm || 'Not specified')}</span>
+          </div>
+        </div>
+        <div>
+          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditGoals()">Edit Goals</button>
+        </div>
+      `;
+    }
+
+    async function promptEditGoals() {
+      const data = currentMemoriesData['goals'] || {};
+      const st = prompt('Short-Term Goals:', getVal(data, 'short_term'));
+      if (st !== null) await saveMemoryItem('goals', 'short_term', st.trim());
+      const lt = prompt('Long-Term Goals:', getVal(data, 'long_term'));
+      if (lt !== null) await saveMemoryItem('goals', 'long_term', lt.trim());
+      loadMemories();
+    }
+
+    function renderPreferencesCategoryHtml(data) {
+      const length = getVal(data, 'length', 'Balanced');
+      const style = getVal(data, 'style', 'Step-by-step');
+      const tone = getVal(data, 'tone', 'Friendly');
+      const lang = getVal(data, 'programming_language', 'Python');
+      const notes = getVal(data, 'additional_notes', '');
+
+      return `
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <span class="memory-field-label">Response Length</span>
+            <div class="pref-option-group">
+              ${['Concise', 'Balanced', 'Detailed'].map(opt => `
+                <div class="pref-radio-label ${length === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'length', '${opt}')">
+                  ${length === opt ? '●' : '○'} ${opt}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div>
+            <span class="memory-field-label">Explanation Style</span>
+            <div class="pref-option-group">
+              ${['Simple', 'Step-by-step', 'Technical'].map(opt => `
+                <div class="pref-radio-label ${style === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'style', '${opt}')">
+                  ${style === opt ? '●' : '○'} ${opt}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div>
+            <span class="memory-field-label">Tone</span>
+            <div class="pref-option-group">
+              ${['Professional', 'Friendly', 'Casual'].map(opt => `
+                <div class="pref-radio-label ${tone === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'tone', '${opt}')">
+                  ${tone === opt ? '●' : '○'} ${opt}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="memory-field-grid">
+            <div class="memory-field-item">
+              <span class="memory-field-label">Preferred Programming Language</span>
+              <span class="memory-field-val">${escapeHtml(lang)}</span>
+            </div>
+            <div class="memory-field-item">
+              <span class="memory-field-label">Additional Instructions</span>
+              <span class="memory-field-val">${escapeHtml(notes || 'None')}</span>
+            </div>
+          </div>
+          <div>
+            <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditPreferences()">Edit Preferences</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function promptEditPreferences() {
+      const data = currentMemoriesData['preferences'] || {};
+      const lang = prompt('Preferred Programming Language:', getVal(data, 'programming_language', 'Python'));
+      if (lang !== null) await saveMemoryItem('preferences', 'programming_language', lang.trim());
+      const notes = prompt('Additional instructions for NOVAX:', getVal(data, 'additional_notes'));
+      if (notes !== null) await saveMemoryItem('preferences', 'additional_notes', notes.trim());
+      loadMemories();
+    }
+
+    function renderProjectsCategoryHtml(data) {
+      let items = Object.keys(data);
+      if (items.length === 0) {
+        return `
+          <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">No project context stored yet.</p>
+          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="addCustomMemoryCategoryPrompt('projects')">+ Add Project Memory</button>
+        `;
+      }
+      let html = '<div class="memory-field-grid">';
+      items.forEach(k => {
+        const itemObj = data[k];
+        const val = itemObj.value || itemObj;
+        const src = itemObj.source || 'USER';
+        html += `
+          <div class="memory-field-item">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="memory-field-label">${escapeHtml(k)}</span>
+              <span class="source-badge ${src}">${src}</span>
+            </div>
+            <span class="memory-field-val">${escapeHtml(val)}</span>
+            <div style="margin-top:6px; text-align:right;">
+              <button class="btn-logout" style="font-size:11px; padding:2px 6px; color:#FCA5A5;" onclick="deleteMemoryConfirm('projects', '${escapeHtml(k).replace(/'/g, "\\'")}')">Delete</button>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      html += `<div style="margin-top:12px;"><button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="addCustomMemoryCategoryPrompt('projects')">+ Add Project Context</button></div>`;
+      return html;
+    }
+
+    function renderRoutinesCategoryHtml(data) {
+      const wakeup = getVal(data, 'wake_up');
+      const study = getVal(data, 'study');
+      const sleep = getVal(data, 'sleep');
+      const workHours = getVal(data, 'working_hours');
+
+      if (!wakeup && !study && !sleep && !workHours) {
+        return `
+          <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">No routine schedule stored yet.</p>
+          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="promptEditRoutines()">+ Add Routine</button>
+        `;
+      }
+
+      return `
+        <div class="memory-field-grid" style="margin-bottom:12px;">
+          <div class="memory-field-item"><span class="memory-field-label">Wake-Up Time</span><span class="memory-field-val">${escapeHtml(wakeup || 'Not set')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Study Time</span><span class="memory-field-val">${escapeHtml(study || 'Not set')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Sleep Time</span><span class="memory-field-val">${escapeHtml(sleep || 'Not set')}</span></div>
+          <div class="memory-field-item"><span class="memory-field-label">Preferred Working Hours</span><span class="memory-field-val">${escapeHtml(workHours || 'Not set')}</span></div>
+        </div>
+        <div>
+          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditRoutines()">Edit Routines</button>
+        </div>
+      `;
+    }
+
+    async function promptEditRoutines() {
+      const data = currentMemoriesData['routines'] || {};
+      const wu = prompt('Wake-up time (e.g. 7:00 AM):', getVal(data, 'wake_up'));
+      if (wu !== null) await saveMemoryItem('routines', 'wake_up', wu.trim());
+      const st = prompt('Study time (e.g. 7:00 PM):', getVal(data, 'study'));
+      if (st !== null) await saveMemoryItem('routines', 'study', st.trim());
+      const sl = prompt('Sleep time (e.g. 11:00 PM):', getVal(data, 'sleep'));
+      if (sl !== null) await saveMemoryItem('routines', 'sleep', sl.trim());
+      const wh = prompt('Preferred working hours (e.g. 6 PM - 10 PM):', getVal(data, 'working_hours'));
+      if (wh !== null) await saveMemoryItem('routines', 'working_hours', wh.trim());
+      loadMemories();
+    }
+
+    function renderCustomCategoryHtml(data) {
+      let items = Object.keys(data);
+      if (items.length === 0) {
+        return `
+          <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">No custom memories added yet.</p>
+          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="addCustomMemoryCategoryPrompt('custom')">+ Add Memory</button>
+        `;
+      }
+      let html = '<div class="memory-field-grid">';
+      items.forEach(k => {
+        const itemObj = data[k];
+        const val = itemObj.value || itemObj;
+        const src = itemObj.source || 'USER';
+        html += `
+          <div class="memory-field-item">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="memory-field-label">${escapeHtml(k)}</span>
+              <span class="source-badge ${src}">${src}</span>
+            </div>
+            <span class="memory-field-val">${escapeHtml(val)}</span>
+            <div style="margin-top:6px; text-align:right;">
+              <button class="btn-logout" style="font-size:11px; padding:2px 6px; color:#FCA5A5;" onclick="deleteMemoryConfirm('custom', '${escapeHtml(k).replace(/'/g, "\\'")}')">Delete</button>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      html += `<div style="margin-top:12px;"><button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="addCustomMemoryCategoryPrompt('custom')">+ Add Memory</button></div>`;
+      return html;
+    }
+
+    async function addCustomMemoryCategoryPrompt(category) {
+      const k = prompt('Memory Label / Title (e.g. Learning Style):');
+      if (!k || !k.trim()) return;
+      const v = prompt('Memory Details / Value:');
+      if (!v || !v.trim()) return;
+      await saveMemoryItem(category, k.trim(), v.trim(), 'USER');
+      loadMemories();
+    }
+
+    async function saveMemoryItem(category, key, value, source = 'USER') {
+      try {
+        await fetch('/api/memory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category, key, value, source })
+        });
+      } catch (e) {}
+    }
+
+    async function deleteMemoryConfirm(category, key) {
+      if (!confirm(`Delete memory "${key}"?\nThis information will no longer be used by NOVAX.`)) return;
+      try {
+        await fetch('/api/memory/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category, key })
+        });
+        loadMemories();
+      } catch (e) {}
+    }
+
+    async function clearAllMemoriesConfirm() {
+      if (!confirm('Are you sure you want to clear ALL memories?\nThis will permanently remove all your saved personal memories from NOVAX-AI.')) return;
+      try {
+        await fetch('/api/memory/clear_all', { method: 'POST' });
+        loadMemories();
+      } catch (e) {}
+    }
+
+    function onMemorySearchInput(val) {
+      renderMemoryCenter(currentMemoriesData, val);
+    }
+
+    function startPersonalizationWizard() {
+      wizardCurrentStep = 1;
+      showWizardStep(1);
+      document.getElementById('wizard-modal').style.display = 'grid';
+    }
+
+    function showWizardStep(step) {
+      const indicator = document.getElementById('wizard-step-indicator');
+      const body = document.getElementById('wizard-step-body');
+      const nextBtn = document.getElementById('btn-wizard-next');
+
+      indicator.innerText = `Step ${step} of 6`;
+
+      if (step === 1) {
+        body.innerHTML = `
+          <h3 style="color:var(--novax-cyan); margin-top:0;">Step 1: Profile</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" id="wiz-name" class="form-control" placeholder="Full Name (e.g. Sriram Prasath)" />
+            <input type="text" id="wiz-country" class="form-control" placeholder="Country (e.g. India)" />
+            <input type="text" id="wiz-tz" class="form-control" placeholder="Timezone (e.g. Asia/Kolkata)" />
+          </div>
+        `;
+        nextBtn.innerText = 'Next Step →';
+      } else if (step === 2) {
+        body.innerHTML = `
+          <h3 style="color:var(--novax-cyan); margin-top:0;">Step 2: Education</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" id="wiz-status" class="form-control" placeholder="Status (e.g. Student)" />
+            <input type="text" id="wiz-inst" class="form-control" placeholder="Institution / University" />
+            <input type="text" id="wiz-course" class="form-control" placeholder="Course / Degree (e.g. B.Tech CS)" />
+          </div>
+        `;
+        nextBtn.innerText = 'Next Step →';
+      } else if (step === 3) {
+        body.innerHTML = `
+          <h3 style="color:var(--novax-cyan); margin-top:0;">Step 3: Career & Skills</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" id="wiz-occ" class="form-control" placeholder="Occupation / Role" />
+            <input type="text" id="wiz-skills" class="form-control" placeholder="Technical Skills (comma separated: Python, Git, DSA)" />
+            <input type="text" id="wiz-goal" class="form-control" placeholder="Target Role / Career Goal" />
+          </div>
+        `;
+        nextBtn.innerText = 'Next Step →';
+      } else if (step === 4) {
+        body.innerHTML = `
+          <h3 style="color:var(--novax-cyan); margin-top:0;">Step 4: Interests</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" id="wiz-interests" class="form-control" placeholder="Topics & Hobbies (comma separated: AI, Web Dev, Music)" />
+          </div>
+        `;
+        nextBtn.innerText = 'Next Step →';
+      } else if (step === 5) {
+        body.innerHTML = `
+          <h3 style="color:var(--novax-cyan); margin-top:0;">Step 5: Goals</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" id="wiz-st" class="form-control" placeholder="Short-Term Goal" />
+            <input type="text" id="wiz-lt" class="form-control" placeholder="Long-Term Goal" />
+          </div>
+        `;
+        nextBtn.innerText = 'Next Step →';
+      } else if (step === 6) {
+        body.innerHTML = `
+          <h3 style="color:var(--novax-cyan); margin-top:0;">Step 6: Preferences</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" id="wiz-lang" class="form-control" placeholder="Preferred Programming Language (e.g. Python)" />
+            <textarea id="wiz-notes" class="form-control" placeholder="Additional preference notes for NOVAX..." rows="3"></textarea>
+          </div>
+        `;
+        nextBtn.innerText = 'Finish Personalization 🎉';
+      }
+    }
+
+    async function nextWizardStep() {
+      if (wizardCurrentStep === 1) {
+        const name = (document.getElementById('wiz-name').value || '').trim();
+        const country = (document.getElementById('wiz-country').value || '').trim();
+        const tz = (document.getElementById('wiz-tz').value || '').trim();
+        if (name) await saveMemoryItem('profile', 'name', name);
+        if (country) await saveMemoryItem('profile', 'country', country);
+        if (tz) await saveMemoryItem('profile', 'timezone', tz);
+      } else if (wizardCurrentStep === 2) {
+        const status = (document.getElementById('wiz-status').value || '').trim();
+        const inst = (document.getElementById('wiz-inst').value || '').trim();
+        const course = (document.getElementById('wiz-course').value || '').trim();
+        if (status) await saveMemoryItem('education', 'status', status);
+        if (inst) await saveMemoryItem('education', 'institution', inst);
+        if (course) await saveMemoryItem('education', 'course', course);
+      } else if (wizardCurrentStep === 3) {
+        const occ = (document.getElementById('wiz-occ').value || '').trim();
+        const skills = (document.getElementById('wiz-skills').value || '').trim();
+        const goal = (document.getElementById('wiz-goal').value || '').trim();
+        if (occ) await saveMemoryItem('career', 'occupation', occ);
+        if (skills) await saveMemoryItem('career', 'tech_skills', skills);
+        if (goal) await saveMemoryItem('career', 'career_goal', goal);
+      } else if (wizardCurrentStep === 4) {
+        const interests = (document.getElementById('wiz-interests').value || '').trim();
+        if (interests) await saveMemoryItem('interests', 'interests_list', interests);
+      } else if (wizardCurrentStep === 5) {
+        const st = (document.getElementById('wiz-st').value || '').trim();
+        const lt = (document.getElementById('wiz-lt').value || '').trim();
+        if (st) await saveMemoryItem('goals', 'short_term', st);
+        if (lt) await saveMemoryItem('goals', 'long_term', lt);
+      } else if (wizardCurrentStep === 6) {
+        const lang = (document.getElementById('wiz-lang').value || '').trim();
+        const notes = (document.getElementById('wiz-notes').value || '').trim();
+        if (lang) await saveMemoryItem('preferences', 'programming_language', lang);
+        if (notes) await saveMemoryItem('preferences', 'additional_notes', notes);
+
+        document.getElementById('wizard-modal').style.display = 'none';
+        loadMemories();
+        return;
+      }
+
+      wizardCurrentStep++;
+      showWizardStep(wizardCurrentStep);
+    }
+
+    function skipWizardStep() {
+      if (wizardCurrentStep >= 6) {
+        document.getElementById('wizard-modal').style.display = 'none';
+        loadMemories();
+        return;
+      }
+      wizardCurrentStep++;
+      showWizardStep(wizardCurrentStep);
     }
 
     // Initialize Auth state on page load
@@ -1613,6 +2626,16 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 return
             memories = self.server.brain.memory.load_memory(user_id=user["id"])
             self._send_json(memories)
+            return
+
+        elif parsed.path == "/api/memory/search":
+            user = self._get_authenticated_user()
+            if not user:
+                self._send_json({"error": "Unauthorized"}, status=401)
+                return
+            query = parse_qs(parsed.query).get("q", [""])[0]
+            results = self.server.brain.memory.search(query, user_id=user["id"])
+            self._send_json(results)
             return
 
         elif parsed.path == "/api/conversations":
@@ -1782,6 +2805,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             category = data.get("category")
             key = data.get("key")
             value = data.get("value")
+            source = data.get("source", "USER")
             is_delete = data.get("delete", False)
 
             if not category or not key:
@@ -1791,10 +2815,26 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             if is_delete:
                 self.server.brain.memory.delete(category, key, user_id=user["id"])
             else:
-                self.server.brain.memory.set(category, key, value, user_id=user["id"])
+                self.server.brain.memory.set(category, key, value, user_id=user["id"], source=source)
 
             updated = self.server.brain.memory.load_memory(user_id=user["id"])
             self._send_json({"success": True, "memory": updated})
+            return
+
+        elif parsed.path == "/api/memory/delete":
+            category = data.get("category")
+            key = data.get("key")
+            if not category or not key:
+                self._send_json({"error": "category and key required"}, status=400)
+                return
+            self.server.brain.memory.delete(category, key, user_id=user["id"])
+            updated = self.server.brain.memory.load_memory(user_id=user["id"])
+            self._send_json({"success": True, "memory": updated})
+            return
+
+        elif parsed.path == "/api/memory/clear_all":
+            self.server.brain.memory.clear_all(user_id=user["id"])
+            self._send_json({"success": True, "memory": {}})
             return
 
         elif parsed.path == "/api/clear":
