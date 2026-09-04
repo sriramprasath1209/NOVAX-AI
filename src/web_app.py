@@ -975,42 +975,9 @@ HTML_PAGE = r"""<!DOCTYPE html>
     .thinking-pulse-dot:nth-child(1) { animation-delay: -0.32s; }
     .thinking-pulse-dot:nth-child(2) { animation-delay: -0.16s; }
 
-    /* Task Filter Buttons & Card Styles */
-    .task-filter-btn {
-      background: var(--novax-surface-secondary);
-      border: 1px solid var(--novax-border);
-      color: var(--novax-text-secondary);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .task-filter-btn.active {
-      background: var(--novax-nav-active-bg);
-      border-color: var(--novax-primary);
-      color: var(--novax-text);
-      font-weight: 600;
-    }
-    .task-card {
-      background: var(--novax-surface);
-      border: 1px solid var(--novax-border);
-      border-radius: 14px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: all 0.2s ease;
-    }
-    .task-card:hover {
-      border-color: var(--novax-primary);
-    }
-    .task-card.completed {
-      opacity: 0.7;
-    }
-    .task-card.completed .task-title {
-      text-decoration: line-through;
-      color: var(--novax-muted);
+    @keyframes thinkingPulse {
+      0%, 80%, 100% { transform: scale(0.2); opacity: 0.2; }
+      40% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -1054,20 +1021,6 @@ HTML_PAGE = r"""<!DOCTYPE html>
             <span>Sign In</span>
           </button>
         </form>
-
-        <div class="auth-divider">
-          <span>or</span>
-        </div>
-
-        <button class="btn-google" onclick="handleGoogleLogin()">
-          <svg width="18" height="18" viewBox="0 0 24 24">
-            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.2 9 5 12 5z"/>
-            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
-            <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15s.7 5.3 1.9 7.7l3.7-2.9z"/>
-            <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.2-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z"/>
-          </svg>
-          <span>Continue with Google</span>
-        </button>
 
         <div class="auth-footer">
           Don't have an account? <a href="#" onclick="showView('signup-view')">Create account</a>
@@ -1121,20 +1074,6 @@ HTML_PAGE = r"""<!DOCTYPE html>
           </button>
         </form>
 
-        <div class="auth-divider">
-          <span>or</span>
-        </div>
-
-        <button class="btn-google" onclick="handleGoogleLogin()">
-          <svg width="18" height="18" viewBox="0 0 24 24">
-            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.2 9 5 12 5z"/>
-            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
-            <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15s.7 5.3 1.9 7.7l3.7-2.9z"/>
-            <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.2-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z"/>
-          </svg>
-          <span>Continue with Google</span>
-        </button>
-
         <div class="auth-footer">
           Already have an account? <a href="#" onclick="showView('login-view')">Sign in</a>
         </div>
@@ -1160,7 +1099,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
         </div>
 
         <button class="btn-new-chat" onclick="startNewChat()">
-          <span>＋ New Chat</span>
+          <span>+ New Chat</span>
         </button>
 
         <div class="nav-section">
@@ -1327,24 +1266,14 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
         <!-- Tasks Panel -->
         <div id="tasks-panel" class="panel-view">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-            <div>
-              <h2 style="color:var(--novax-cyan); margin:0;">Your Personal Tasks</h2>
-              <p style="color:var(--novax-muted); font-size:14px; margin:4px 0 0 0;">Manage your daily priorities safely.</p>
-            </div>
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <input type="text" id="search-tasks-input" class="form-control" style="width:220px;" placeholder="Search tasks..." oninput="filterTasks()" />
-              <button class="btn-primary" onclick="promptCreateTask()" style="width:auto; padding:8px 16px;">+ Add Task</button>
+          <h2 style="color:var(--novax-cyan); margin-top:0;">Your Personal Tasks</h2>
+          <p style="color:var(--novax-muted); font-size:14px;">Manage your daily priorities safely.</p>
+          <div id="tasks-grid" class="card-grid">
+            <div class="data-card">
+              <h3>Personal AI Setup</h3>
+              <p>Configure personal preferences and memories in NOVAX.</p>
             </div>
           </div>
-
-          <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <button class="task-filter-btn active" id="task-filter-all" onclick="setTaskFilter('all')">All</button>
-            <button class="task-filter-btn" id="task-filter-pending" onclick="setTaskFilter('pending')">Pending</button>
-            <button class="task-filter-btn" id="task-filter-completed" onclick="setTaskFilter('completed')">Completed</button>
-          </div>
-
-          <div id="tasks-grid" class="card-grid"></div>
         </div>
 
       </main>
@@ -1382,8 +1311,6 @@ HTML_PAGE = r"""<!DOCTYPE html>
         loadConversationsList();
       } else if (panelId === 'memory-panel') {
         loadMemories();
-      } else if (panelId === 'tasks-panel') {
-        loadTasks();
       }
     }
 
@@ -1469,7 +1396,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
         };
 
         item.innerHTML = `
-          <span class="sidebar-conv-title" title="${escapeHtml(conv.title)}">💬 ${escapeHtml(conv.title)}</span>
+          <span class="sidebar-conv-title" title="${escapeHtml(conv.title)}">${escapeHtml(conv.title)}</span>
           <button class="sidebar-conv-del" onclick="deleteConversation('${conv.id}', event)" title="Delete Conversation">✕</button>
         `;
         container.appendChild(item);
@@ -1499,13 +1426,13 @@ HTML_PAGE = r"""<!DOCTYPE html>
               <h3 class="conv-card-title">${escapeHtml(conv.title)}</h3>
             </div>
             <div class="conv-card-meta">
-              📅 ${dateStr} &nbsp;•&nbsp; 💬 ${msgCount} message${msgCount === 1 ? '' : 's'}
+              Date: ${dateStr} &nbsp;•&nbsp; ${msgCount} message${msgCount === 1 ? '' : 's'}
             </div>
           </div>
           <div class="conv-card-actions">
             <button class="btn-primary" style="padding:8px 14px; font-size:13px; flex:1;" onclick="openConversation('${conv.id}')">Open & Write</button>
-            <button class="btn-logout" style="padding:8px 10px; font-size:13px; color:var(--novax-cyan);" onclick="renameConversationPrompt('${conv.id}', '${escapeHtml(conv.title).replace(/'/g, "\\'")}')">✏</button>
-            <button class="btn-logout" style="padding:8px 10px; font-size:13px; color:#FCA5A5;" onclick="deleteConversation('${conv.id}')">🗑</button>
+            <button class="btn-logout" style="padding:8px 10px; font-size:13px; color:var(--novax-cyan);" onclick="renameConversationPrompt('${conv.id}', '${escapeHtml(conv.title).replace(/'/g, "\\'")}')">Rename</button>
+            <button class="btn-logout" style="padding:8px 10px; font-size:13px; color:#FCA5A5;" onclick="deleteConversation('${conv.id}')">Delete</button>
           </div>
         `;
         grid.appendChild(card);
@@ -1569,7 +1496,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       if (msgId) {
         const delBtn = document.createElement('button');
         delBtn.className = 'msg-delete-btn';
-        delBtn.innerText = '🗑 Delete';
+        delBtn.innerText = 'Delete';
         delBtn.onclick = (e) => {
           e.stopPropagation();
           deleteMessage(msgId, wrapper);
@@ -1654,25 +1581,6 @@ HTML_PAGE = r"""<!DOCTYPE html>
       } finally {
         btn.disabled = false;
         btn.innerText = 'Create account';
-      }
-    }
-
-    async function handleGoogleLogin() {
-      hideError('login-error');
-      hideError('signup-error');
-      try {
-        const res = await fetch('/api/auth/google');
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          const msg = 'Google Auth is not configured. Please add GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET to your .env file.';
-          showError('login-error', msg);
-          showError('signup-error', msg);
-        }
-      } catch (e) {
-        showError('login-error', 'Google Authentication failed to launch.');
-        showError('signup-error', 'Google Authentication failed to launch.');
       }
     }
 
@@ -2464,7 +2372,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
             <textarea id="wiz-notes" class="form-control" placeholder="Additional preference notes for NOVAX..." rows="3"></textarea>
           </div>
         `;
-        nextBtn.innerText = 'Finish Personalization 🎉';
+        nextBtn.innerText = 'Finish Personalization';
       }
     }
 
@@ -2588,35 +2496,6 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 self._send_json({"authenticated": True, "user": {"id": user["id"], "email": user["email"], "name": user["name"]}})
             else:
                 self._send_json({"authenticated": False})
-            return
-
-        elif parsed.path == "/api/auth/google":
-            host = self.headers.get("Host", "127.0.0.1:8000")
-            redirect_uri = f"http://{host}/api/auth/google/callback"
-            url = auth.get_google_auth_url(redirect_uri)
-            self._send_json({"url": url})
-            return
-
-        elif parsed.path == "/api/auth/google/callback":
-            query = parse_qs(parsed.query)
-            code = query.get("code", [None])[0]
-            host = self.headers.get("Host", "127.0.0.1:8000")
-            redirect_uri = f"http://{host}/api/auth/google/callback"
-
-            if not code:
-                self._send_json({"error": "Missing code parameter"}, status=400)
-                return
-
-            user, err = auth.process_google_callback(code, redirect_uri)
-            if err:
-                self._send_json({"error": err}, status=400)
-                return
-
-            session_id = auth.create_session(user["id"])
-            self.send_response(302)
-            self.send_header("Location", "/")
-            self.send_header("Set-Cookie", f"session_id={session_id}; Path=/; HttpOnly; SameSite=Lax")
-            self.end_headers()
             return
 
         elif parsed.path == "/api/memory":
