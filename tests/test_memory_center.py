@@ -130,6 +130,30 @@ class TestMemoryCenter(unittest.TestCase):
         self.assertIn("cleared", res5.lower())
         self.assertEqual(len(self.memory.load_memory(user_id=self.user_a_id)), 0)
 
+    def test_brain_uses_memory_module_context(self):
+        self.memory.set("profile", "city", "Chennai", user_id=self.user_a_id)
+        self.memory.set("career", "role", "Lead Developer", user_id=self.user_a_id)
+        self.memory.set("custom", "I have a cat named Whiskers", "true", user_id=self.user_a_id)
+
+        brain = Brain()
+        brain.memory = self.memory
+        brain.ai = MagicMock()
+        brain.ai.ask.return_value = "You live in Chennai and work as a Lead Developer."
+
+        reply = brain.get_response("What details do you know about me?", user_id=self.user_a_id, user_name="Arun")
+
+        # Verify ai.ask was called with messages containing memory context
+        self.assertTrue(brain.ai.ask.called)
+        sent_messages = brain.ai.ask.call_args[0][0]
+
+        # Find system message containing Authenticated User Context
+        system_msg = next((m for m in sent_messages if m.get("role") == "system" and "[User Personal Memory Context]" in m.get("content", "")), None)
+        self.assertIsNotNone(system_msg, "System context message must contain [User Personal Memory Context]")
+        content = system_msg["content"]
+        self.assertIn("city: Chennai", content)
+        self.assertIn("role: Lead Developer", content)
+        self.assertIn("I have a cat named Whiskers", content)
+
 
 if __name__ == "__main__":
     unittest.main()

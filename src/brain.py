@@ -82,6 +82,35 @@ class Brain:
         if pref_lines:
             prefs_text = "\n\n[User Personalized Response Preferences]\n" + "\n".join(pref_lines) + "\nPlease align your answers with these preferences."
 
+        # Fetch all stored user memories for memory module context
+        all_memories = self.memory.load_memory(user_id=user_id)
+        memory_lines = []
+        for cat, items in all_memories.items():
+            if cat == "preferences":
+                continue
+            if isinstance(items, dict):
+                for k, item_val in items.items():
+                    if hasattr(item_val, "get") and callable(item_val.get):
+                        v_str = str(item_val.get("value", item_val))
+                    elif isinstance(item_val, dict):
+                        v_str = str(item_val.get("value", item_val))
+                    else:
+                        v_str = str(item_val)
+
+                    if v_str.lower() == "true":
+                        memory_lines.append(f"- [{cat.title()}] {k}")
+                    else:
+                        memory_lines.append(f"- [{cat.title()}] {k}: {v_str}")
+
+        memory_text = ""
+        if memory_lines:
+            memory_text = (
+                "\n\n[User Personal Memory Context]\n"
+                "The following details are retrieved directly from the user's Memory Module:\n"
+                + "\n".join(memory_lines) +
+                "\nInstructions: ALWAYS use these saved details from the Memory Module to answer the user's questions whenever they ask about their personal information, background, preferences, skills, career, education, goals, or saved facts."
+            )
+
         # Build authenticated user context system message
         user_context_message = {
             "role": "system",
@@ -94,6 +123,7 @@ class Brain:
                 f"If asked 'what is my name' or 'who am I', answer that their name is {user_name}. "
                 f"Do NOT use emojis in your responses under any circumstances. Keep responses 100% professional and emoji-free."
                 f"{prefs_text}"
+                f"{memory_text}"
             )
         }
 
