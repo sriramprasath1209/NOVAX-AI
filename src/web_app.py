@@ -1116,18 +1116,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
           <div class="nav-item" onclick="showPanel('projects-panel')">
             <span>Projects</span>
           </div>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Agent Tools</div>
-          <div class="nav-item" onclick="alert('Tools section is active.')">
-            <span>Tools</span>
-          </div>
           <div class="nav-item" onclick="showPanel('tasks-panel')">
             <span>Tasks</span>
-          </div>
-          <div class="nav-item" onclick="alert('Automations feature enabled.')">
-            <span>Automations</span>
           </div>
         </div>
 
