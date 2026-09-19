@@ -697,48 +697,304 @@ HTML_PAGE = r"""<!DOCTYPE html>
       border-color: rgba(239, 68, 68, 0.4);
     }
 
-    /* Conversations Panel Cards */
-    .conv-card {
-      background: var(--novax-surface);
-      border: 1px solid var(--novax-border);
-      border-radius: 14px;
-      padding: 18px;
+    /* Enhanced Glassmorphism Conversations Panel */
+    .conv-header-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(6, 182, 212, 0.12) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .conv-controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .conv-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .conv-pill-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--novax-border);
+      color: var(--novax-text-secondary);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .conv-card:hover {
+    .conv-pill-btn:hover, .conv-pill-btn.active {
+      background: rgba(99, 102, 241, 0.2);
       border-color: var(--novax-primary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+      color: var(--novax-cyan);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
     }
 
-    .conv-card-header {
+    .view-toggle-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--novax-border);
+      color: var(--novax-muted);
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 13px;
       display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .view-toggle-btn.active {
+      background: var(--novax-primary);
+      color: #fff;
+      border-color: var(--novax-primary);
+    }
+
+    /* Grid vs List Container */
+    .conv-grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .conv-grid-container.list-mode {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Glassmorphism Card */
+    .conv-card {
+      background: linear-gradient(135deg, rgba(22, 27, 46, 0.75) 0%, rgba(15, 20, 36, 0.85) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .conv-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--novax-primary), var(--novax-cyan), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .conv-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px -8px rgba(99, 102, 241, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .conv-card:hover::before {
+      opacity: 1;
+    }
+
+    .conv-card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .conv-card-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .conv-card-title-group {
+      flex: 1;
+      min-width: 0;
     }
 
     .conv-card-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 700;
-      color: var(--novax-text);
-      margin: 0;
-      word-break: break-word;
+      color: #F3F4F6;
+      margin: 0 0 4px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.2px;
     }
 
-    .conv-card-meta {
-      font-size: 12px;
-      color: var(--novax-muted);
-      margin-bottom: 14px;
+    .conv-card-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .conv-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--novax-text-secondary);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .conv-badge-msg {
+      background: rgba(99, 102, 241, 0.15);
+      color: #A5B4FC;
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .conv-badge-date {
+      background: rgba(6, 182, 212, 0.12);
+      color: var(--novax-cyan);
+      border-color: rgba(6, 182, 212, 0.25);
+    }
+
+    /* Message Preview Snippet */
+    .conv-snippet-box {
+      background: rgba(10, 14, 26, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 10px 0 14px 0;
+      font-size: 13px;
+      color: var(--novax-text-secondary);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .conv-card-actions {
       display: flex;
+      align-items: center;
       gap: 8px;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .conv-btn-open {
+      flex: 1;
+      background: linear-gradient(135deg, var(--novax-primary) 0%, #4F46E5 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+    }
+
+    .conv-btn-open:hover {
+      background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .conv-btn-icon, .conv-btn-text {
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--novax-text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .conv-btn-icon:hover, .conv-btn-text:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--novax-cyan);
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .conv-btn-icon.delete-btn:hover, .conv-btn-text.delete-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #FCA5A5;
+      border-color: rgba(239, 68, 68, 0.4);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    }
+
+    /* List Mode Card styling */
+    .conv-grid-container.list-mode .conv-card {
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+    }
+
+    .conv-grid-container.list-mode .conv-card-top {
+      margin-bottom: 0;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conv-grid-container.list-mode .conv-snippet-box {
+      margin: 0;
+      flex: 1.5;
+      -webkit-line-clamp: 1;
+    }
+
+    .conv-grid-container.list-mode .conv-card-actions {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+      flex: initial;
     }
 
     /* Memory Center Styling */
@@ -1163,14 +1419,55 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
         <!-- Conversations Panel -->
         <div id="conversations-panel" class="panel-view">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <!-- Banner Header -->
+          <div class="conv-header-banner">
             <div>
-              <h2 style="color:var(--novax-cyan); margin:0;">Conversations</h2>
-              <p style="color:var(--novax-muted); font-size:14px; margin:4px 0 0 0;">All your previous chats are stored here with their headings. You can reopen, write on them, or delete them.</p>
+              <h2 style="font-size:24px; font-weight:800; color:var(--novax-cyan); margin:0 0 6px 0;">
+                Conversations
+              </h2>
+              <p style="color:var(--novax-text-secondary); font-size:14px; margin:0;">
+                All your previous chats are stored here. Reopen, write on, rename, or delete any past conversation.
+              </p>
             </div>
-            <input type="text" id="search-conversations-input" class="form-control" style="width:240px;" placeholder="Search conversations..." oninput="filterConversations()" />
+            <div style="display:flex; gap:12px; align-items:center;">
+              <button class="btn-primary" onclick="startNewChatFromPanel()" style="padding:10px 18px; width:auto; display:inline-flex; align-items:center; gap:6px;">
+                + New Chat
+              </button>
+            </div>
           </div>
-          <div id="conversations-grid" class="card-grid"></div>
+
+          <!-- Controls Bar: Filter Pills, Search, Sort & View Toggles -->
+          <div class="conv-controls-bar">
+            <div class="conv-filter-group">
+              <button class="conv-pill-btn active" id="conv-filter-all" onclick="setConvFilter('all')">All (<span id="conv-count-all">0</span>)</button>
+              <button class="conv-pill-btn" id="conv-filter-today" onclick="setConvFilter('today')">Today (<span id="conv-count-today">0</span>)</button>
+              <button class="conv-pill-btn" id="conv-filter-week" onclick="setConvFilter('week')">This Week (<span id="conv-count-week">0</span>)</button>
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <div style="position:relative; width:240px;">
+                <input type="text" id="search-conversations-input" class="form-control" placeholder="Search title or text..." oninput="filterConversations()" />
+              </div>
+
+              <select id="conv-sort-select" class="form-control" style="width:130px; cursor:pointer;" onchange="filterConversations()">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="messages">Most Messages</option>
+              </select>
+
+              <div style="display:flex; gap:4px; background:rgba(255,255,255,0.03); border:1px solid var(--novax-border); border-radius:10px; padding:3px;">
+                <button class="view-toggle-btn active" id="btn-view-grid" onclick="setConvViewMode('grid')" title="Grid View">
+                  <span>Grid</span>
+                </button>
+                <button class="view-toggle-btn" id="btn-view-list" onclick="setConvViewMode('list')" title="List View">
+                  <span>List</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conversations Grid / List Container -->
+          <div id="conversations-grid" class="conv-grid-container"></div>
         </div>
 
         <!-- Personal Memory Center Panel -->
@@ -1356,14 +1653,81 @@ HTML_PAGE = r"""<!DOCTYPE html>
       loadConversationsList();
     }
 
+    let currentConvFilter = 'all';
+    let currentConvViewMode = 'grid';
+
+    function setConvViewMode(mode) {
+      currentConvViewMode = mode;
+      const grid = document.getElementById('conversations-grid');
+      const btnGrid = document.getElementById('btn-view-grid');
+      const btnList = document.getElementById('btn-view-list');
+
+      if (grid) {
+        if (mode === 'list') {
+          grid.classList.add('list-mode');
+        } else {
+          grid.classList.remove('list-mode');
+        }
+      }
+      if (btnGrid) btnGrid.classList.toggle('active', mode === 'grid');
+      if (btnList) btnList.classList.toggle('active', mode === 'list');
+      filterConversations();
+    }
+
+    function setConvFilter(filter) {
+      currentConvFilter = filter;
+      ['all', 'today', 'week'].forEach(f => {
+        const el = document.getElementById('conv-filter-' + f);
+        if (el) el.classList.toggle('active', f === filter);
+      });
+      filterConversations();
+    }
+
+    function updateConvCounts(conversations) {
+      const now = Math.floor(Date.now() / 1000);
+      const oneDay = 86400;
+      const oneWeek = 7 * 86400;
+
+      const total = conversations.length;
+      const today = conversations.filter(c => (now - (c.last_message_at || c.created_at)) < oneDay).length;
+      const week = conversations.filter(c => (now - (c.last_message_at || c.created_at)) < oneWeek).length;
+
+      const elAll = document.getElementById('conv-count-all');
+      const elToday = document.getElementById('conv-count-today');
+      const elWeek = document.getElementById('conv-count-week');
+
+      if (elAll) elAll.textContent = total;
+      if (elToday) elToday.textContent = today;
+      if (elWeek) elWeek.textContent = week;
+    }
+
+    function formatRelativeTime(timestamp) {
+      if (!timestamp) return 'Unknown date';
+      const now = Math.floor(Date.now() / 1000);
+      const diff = now - timestamp;
+
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+
+      const date = new Date(timestamp * 1000);
+      const isThisYear = date.getFullYear() === new Date().getFullYear();
+      return date.toLocaleDateString([], isThisYear ? { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' } : { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function startNewChatFromPanel() {
+      startNewChat();
+    }
+
     async function loadConversationsList() {
       try {
         const res = await fetch('/api/conversations');
         if (!res.ok) return;
         const conversations = await res.json();
         allConversationsCache = conversations || [];
+        updateConvCounts(allConversationsCache);
         renderSidebarConversations(allConversationsCache);
-        renderGridConversations(allConversationsCache);
+        filterConversations();
       } catch (e) {}
     }
 
@@ -1399,7 +1763,15 @@ HTML_PAGE = r"""<!DOCTYPE html>
       grid.innerHTML = '';
 
       if (!conversations || conversations.length === 0) {
-        grid.innerHTML = '<div class="data-card"><p>No saved conversations found.</p></div>';
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; background: rgba(18, 24, 38, 0.6); backdrop-filter: blur(12px); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 40px 20px; text-align: center;">
+            <h3 style="color: var(--novax-text); font-size: 16px; margin: 0 0 6px 0;">No conversations found</h3>
+            <p style="color: var(--novax-muted); font-size: 13px; margin: 0 0 16px 0;">Try adjusting your search query or start a brand new conversation.</p>
+            <button class="btn-primary" onclick="startNewChatFromPanel()" style="width: auto; padding: 8px 18px;">
+              + Start New Chat
+            </button>
+          </div>
+        `;
         return;
       }
 
@@ -1407,22 +1779,42 @@ HTML_PAGE = r"""<!DOCTYPE html>
         const card = document.createElement('div');
         card.className = 'conv-card';
 
-        const dateStr = conv.created_at ? new Date(conv.created_at * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+        const lastActive = conv.last_message_at || conv.created_at;
+        const timeStr = formatRelativeTime(lastActive);
         const msgCount = conv.message_count || 0;
+        const rawSnippet = conv.last_message || 'No messages yet in this conversation.';
+        const snippetText = escapeHtml(rawSnippet);
+
+        const initialLetter = (conv.title || 'C').trim().charAt(0).toUpperCase();
 
         card.innerHTML = `
           <div>
-            <div class="conv-card-header">
-              <h3 class="conv-card-title">${escapeHtml(conv.title)}</h3>
+            <div class="conv-card-top">
+              <div class="conv-card-avatar" style="font-weight:700; color:var(--novax-cyan); font-size:16px;">${initialLetter}</div>
+              <div class="conv-card-title-group">
+                <h3 class="conv-card-title" title="${escapeHtml(conv.title)}">${escapeHtml(conv.title)}</h3>
+                <div class="conv-card-badges">
+                  <span class="conv-badge conv-badge-date">${timeStr}</span>
+                  <span class="conv-badge conv-badge-msg">${msgCount} msg${msgCount === 1 ? '' : 's'}</span>
+                </div>
+              </div>
             </div>
-            <div class="conv-card-meta">
-              Date: ${dateStr} &nbsp;•&nbsp; ${msgCount} message${msgCount === 1 ? '' : 's'}
+
+            <div class="conv-snippet-box" title="${snippetText}">
+              "${snippetText}"
             </div>
           </div>
+
           <div class="conv-card-actions">
-            <button class="btn-primary" style="padding:8px 14px; font-size:13px; flex:1;" onclick="openConversation('${conv.id}')">Open & Write</button>
-            <button class="btn-logout" style="padding:8px 10px; font-size:13px; color:var(--novax-cyan);" onclick="renameConversationPrompt('${conv.id}', '${escapeHtml(conv.title).replace(/'/g, "\\'")}')">Rename</button>
-            <button class="btn-logout" style="padding:8px 10px; font-size:13px; color:#FCA5A5;" onclick="deleteConversation('${conv.id}')">Delete</button>
+            <button class="conv-btn-open" onclick="openConversation('${conv.id}')">
+              Open & Write
+            </button>
+            <button class="conv-btn-text" onclick="renameConversationPrompt('${conv.id}', '${escapeHtml(conv.title).replace(/'/g, "\\'")}')" title="Rename Conversation">
+              Rename
+            </button>
+            <button class="conv-btn-text delete-btn" onclick="deleteConversation('${conv.id}')" title="Delete Conversation">
+              Delete
+            </button>
           </div>
         `;
         grid.appendChild(card);
@@ -1430,12 +1822,36 @@ HTML_PAGE = r"""<!DOCTYPE html>
     }
 
     function filterConversations() {
-      const q = (document.getElementById('search-conversations-input').value || '').toLowerCase().trim();
-      if (!q) {
-        renderGridConversations(allConversationsCache);
-        return;
+      const q = (document.getElementById('search-conversations-input')?.value || '').toLowerCase().trim();
+      const sortVal = document.getElementById('conv-sort-select')?.value || 'newest';
+
+      const now = Math.floor(Date.now() / 1000);
+      const oneDay = 86400;
+      const oneWeek = 7 * 86400;
+
+      let filtered = [...allConversationsCache];
+
+      if (currentConvFilter === 'today') {
+        filtered = filtered.filter(c => (now - (c.last_message_at || c.created_at)) < oneDay);
+      } else if (currentConvFilter === 'week') {
+        filtered = filtered.filter(c => (now - (c.last_message_at || c.created_at)) < oneWeek);
       }
-      const filtered = allConversationsCache.filter(c => (c.title || '').toLowerCase().includes(q));
+
+      if (q) {
+        filtered = filtered.filter(c =>
+          (c.title || '').toLowerCase().includes(q) ||
+          (c.last_message || '').toLowerCase().includes(q)
+        );
+      }
+
+      if (sortVal === 'oldest') {
+        filtered.sort((a, b) => (a.last_message_at || a.created_at) - (b.last_message_at || b.created_at));
+      } else if (sortVal === 'messages') {
+        filtered.sort((a, b) => (b.message_count || 0) - (a.message_count || 0));
+      } else {
+        filtered.sort((a, b) => (b.last_message_at || b.created_at) - (a.last_message_at || a.created_at));
+      }
+
       renderGridConversations(filtered);
     }
 

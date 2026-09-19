@@ -311,7 +311,8 @@ class Database:
             cursor.execute("""
                 SELECT c.id, c.user_id, c.title, c.created_at,
                        COUNT(m.id) as message_count,
-                       MAX(m.created_at) as last_message_at
+                       MAX(m.created_at) as last_message_at,
+                       (SELECT content FROM messages WHERE conversation_id = c.id AND user_id = c.user_id ORDER BY created_at DESC LIMIT 1) as last_message
                 FROM conversations c
                 LEFT JOIN messages m ON c.id = m.conversation_id AND c.user_id = m.user_id
                 WHERE c.user_id = ?
