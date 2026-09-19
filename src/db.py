@@ -393,6 +393,16 @@ class Database:
             """, (project_id, user_id, name, description, time.time()))
             conn.commit()
 
+    def update_project(self, project_id, user_id, name, description=""):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE projects
+                SET name = ?, description = ?
+                WHERE id = ? AND user_id = ?
+            """, (name, description, project_id, user_id))
+            conn.commit()
+
     def delete_project(self, project_id, user_id):
         with self.get_connection() as conn:
             cursor = conn.cursor()
