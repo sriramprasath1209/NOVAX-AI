@@ -62,6 +62,36 @@ class Brain:
 
         tabular_requested = any(kw in lower for kw in tabular_requests)
 
+        # Fetch user settings (response style, web search, etc.)
+        user_settings = db.get_user_settings(user_id)
+        response_style = user_settings.get("response_style", "default")
+        web_search_enabled = user_settings.get("web_search", True)
+
+        style_instruction = ""
+        if response_style == "concise":
+            style_instruction = (
+                "\n\n[Active Response Style: CONCISE]\n"
+                "- Keep all responses short, direct, and to the point.\n"
+                "- Give the core answer immediately with zero unnecessary filler, rambling, or lengthy pleasantries."
+            )
+        elif response_style == "code_first":
+            style_instruction = (
+                "\n\n[Active Response Style: CODE-FIRST]\n"
+                "- Prioritize complete, clean, production-grade code solutions upfront.\n"
+                "- Provide the code block first, accompanied by brief, relevant bullet-point explanations."
+            )
+        elif response_style == "in_depth":
+            style_instruction = (
+                "\n\n[Active Response Style: IN-DEPTH]\n"
+                "- Provide comprehensive, thorough, and well-structured explanations.\n"
+                "- Break down underlying concepts, practical code examples, key architectural considerations, and edge cases."
+            )
+        else:
+            style_instruction = (
+                "\n\n[Active Response Style: BALANCED]\n"
+                "- Provide clear, helpful, natural, and well-structured answers."
+            )
+
         # Fetch user preferences
         length_pref = self.memory.get("preferences", "length", user_id=user_id)
         style_pref = self.memory.get("preferences", "style", user_id=user_id)
@@ -122,47 +152,49 @@ class Brain:
                 f"You are currently assisting {user_name}. If asked 'who created NOVAX' or 'who made you', answer Sriram Prasath. "
                 f"If asked 'what is my name' or 'who am I', answer that their name is {user_name}. "
                 f"Do NOT use emojis in your responses under any circumstances. Keep responses 100% professional and emoji-free."
+                f"{style_instruction}"
                 f"{prefs_text}"
                 f"{memory_text}"
             )
         }
 
-        # Live Web Search & Real-Time News enrichment
+        # Live Web Search & Real-Time News enrichment (only if enabled in settings)
         search_context_message = None
-        is_news_query = any(kw in lower for kw in ["news", "latest", "update", "updates", "current events", "what happened", "today news"])
-        
-        if is_news_query:
-            news_data = self.search_engine.fetch_live_news(user_message)
-            if news_data:
-                search_context_message = {
-                    "role": "system",
-                    "content": (
-                        f"[Live Real-Time News Feed - Just In]\n"
-                        f"{news_data}\n\n"
-                        f"Instructions: You HAVE full access to live real-time news. Use the live headlines and timestamps above to summarize and answer the user's request about the latest news clearly and accurately. Never claim you don't have access to current news."
-                    )
-                }
-        else:
-            should_search = any(
-                word in lower for word in [
-                    "who is", "who was", "what is", "where is", "tell me about",
-                    "cm", "minister", "actor", "president", "chief minister", "details of", "information", "vijay"
-                ]
-            )
-
-            if should_search:
-                search_results = self.search_engine.search_wikipedia(user_message)
-                if search_results:
-                    primary = search_results[0]
+        if web_search_enabled:
+            is_news_query = any(kw in lower for kw in ["news", "latest", "update", "updates", "current events", "what happened", "today news"])
+            
+            if is_news_query:
+                news_data = self.search_engine.fetch_live_news(user_message)
+                if news_data:
                     search_context_message = {
                         "role": "system",
                         "content": (
-                            f"[Verified Live Information]\n"
-                            f"Title: {primary.get('title')}\n"
-                            f"Fact Summary: {primary.get('extract')}\n\n"
-                            f"Instructions: Use the verified live information above to provide 100% accurate details in plain text. Do not include any images or photo tags."
+                            f"[Live Real-Time News Feed - Just In]\n"
+                            f"{news_data}\n\n"
+                            f"Instructions: You HAVE full access to live real-time news. Use the live headlines and timestamps above to summarize and answer the user's request about the latest news clearly and accurately. Never claim you don't have access to current news."
                         )
                     }
+            else:
+                should_search = any(
+                    word in lower for word in [
+                        "who is", "who was", "what is", "where is", "tell me about",
+                        "cm", "minister", "actor", "president", "chief minister", "details of", "information", "vijay"
+                    ]
+                )
+
+                if should_search:
+                    search_results = self.search_engine.search_wikipedia(user_message)
+                    if search_results:
+                        primary = search_results[0]
+                        search_context_message = {
+                            "role": "system",
+                            "content": (
+                                f"[Verified Live Information]\n"
+                                f"Title: {primary.get('title')}\n"
+                                f"Fact Summary: {primary.get('extract')}\n\n"
+                                f"Instructions: Use the verified live information above to provide 100% accurate details in plain text. Do not include any images or photo tags."
+                            )
+                        }
 
         user_messages = self.conversation.get_messages(user_id=user_id, conversation_id=conversation_id)
         messages_to_send = [user_context_message] + user_messages

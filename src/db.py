@@ -149,6 +149,19 @@ class Database:
                 )
             """)
 
+            # Settings table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS settings (
+                    user_id TEXT PRIMARY KEY,
+                    response_style TEXT DEFAULT 'default',
+                    web_search INTEGER DEFAULT 1,
+                    theme TEXT DEFAULT 'dark',
+                    font_size TEXT DEFAULT 'normal',
+                    updated_at REAL NOT NULL,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            """)
+
             conn.commit()
 
         # Migrate old data/memory.json into fallback admin if needed
@@ -413,10 +426,10 @@ class Database:
     def get_user_tasks(self, user_id):
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC", (user_id,))
+            cursor.execute("SELECT * FROM tasks WHERE user_id = ? ORDER BY completed ASC, created_at DESC", (user_id,))
             return [dict(row) for row in cursor.fetchall()]
 
-    def create_task(self, task_id, user_id, title, tag="User Task"):
+    def create_task(self, task_id, user_id, title, tag="General"):
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -431,10 +444,132 @@ class Database:
             cursor.execute("UPDATE tasks SET completed = ? WHERE id = ? AND user_id = ?", (1 if completed else 0, task_id, user_id))
             conn.commit()
 
+    def update_task(self, task_id, user_id, title, tag=None):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            if tag is not None:
+                cursor.execute("UPDATE tasks SET title = ?, tag = ? WHERE id = ? AND user_id = ?", (title, tag, task_id, user_id))
+            else:
+                cursor.execute("UPDATE tasks SET title = ? WHERE id = ? AND user_id = ?", (title, task_id, user_id))
+            conn.commit()
+
     def delete_task(self, task_id, user_id):
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM tasks WHERE id = ? AND user_id = ?", (task_id, user_id))
+            conn.commit()
+
+    def clear_completed_tasks(self, user_id):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM tasks WHERE completed = 1 AND user_id = ?", (user_id,))
+            conn.commit()
+
+    # --- Settings & Profile queries ---
+    def get_user_settings(self, user_id):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM settings WHERE user_id = ?", (user_id,))
+            row = cursor.fetchone()
+            if row:
+                d = dict(row)
+                return {
+                    "response_style": d.get("response_style") or "default",
+                    "web_search": bool(d.get("web_search", 1)),
+                    "theme": d.get("theme") or "dark",
+                    "font_size": d.get("font_size") or "normal",
+                    "updated_at": d.get("updated_at", 0)
+                }
+            return {
+                "response_style": "default",
+                "web_search": True,
+                "theme": "dark",
+                "font_size": "normal",
+                "updated_at": time.time()
+            }
+
+    def update_user_settings(self, user_id, response_style=None, web_search=None, theme=None, font_size=None):
+        current = self.get_user_settings(user_id)
+        new_style = response_style if response_style is not None else current["response_style"]
+        new_search = int(web_search) if web_search is not None else (1 if current["web_search"] else 0)
+        new_theme = theme if theme is not None else current["theme"]
+        new_font = font_size if font_size is not None else current["font_size"]
+        now = time.time()
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO settings (user_id, response_style, web_search, theme, font_size, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    response_style = excluded.response_style,
+                    web_search = excluded.web_search,
+                    theme = excluded.theme,
+                    font_size = excluded.font_size,
+                    updated_at = excluded.updated_at
+            """, (user_id, new_style, new_search, new_theme, new_font, now))
+            conn.commit()
+        return self.get_user_settings(user_id)
+
+    def update_user_profile(self, user_id, name=None, password_hash=None, salt=None):
+        now = time.time()
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            if name is not None and password_hash is not None and salt is not None:
+                cursor.execute("UPDATE users SET name = ?, password_hash = ?, salt = ? WHERE id = ?", (name, password_hash, salt, user_id))
+                cursor.execute("""
+                    INSERT OR REPLACE INTO memories (user_id, category, key, value, source, created_at, updated_at)
+                    VALUES (?, 'user', 'name', ?, 'USER', ?, ?)
+                """, (user_id, name, now, now))
+            elif name is not None:
+                cursor.execute("UPDATE users SET name = ? WHERE id = ?", (name, user_id))
+                cursor.execute("""
+                    INSERT OR REPLACE INTO memories (user_id, category, key, value, source, created_at, updated_at)
+                    VALUES (?, 'user', 'name', ?, 'USER', ?, ?)
+                """, (user_id, name, now, now))
+            elif password_hash is not None and salt is not None:
+                cursor.execute("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", (password_hash, salt, user_id))
+            conn.commit()
+
+    def export_user_data(self, user_id):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, email, name, created_at FROM users WHERE id = ?", (user_id,))
+            user_row = cursor.fetchone()
+            user_profile = dict(user_row) if user_row else {}
+
+            settings = self.get_user_settings(user_id)
+            memories = self.get_user_memories(user_id)
+
+            cursor.execute("SELECT * FROM conversations WHERE user_id = ? ORDER BY created_at ASC", (user_id,))
+            conv_rows = [dict(r) for r in cursor.fetchall()]
+            conversations = []
+            for conv in conv_rows:
+                cursor.execute("SELECT role, content, created_at FROM messages WHERE conversation_id = ? AND user_id = ? ORDER BY id ASC", (conv["id"], user_id))
+                conv["messages"] = [dict(m) for m in cursor.fetchall()]
+                conversations.append(conv)
+
+            projects = self.get_user_projects(user_id)
+            tasks = self.get_user_tasks(user_id)
+
+            return {
+                "exported_at": time.time(),
+                "profile": user_profile,
+                "settings": settings,
+                "memories": memories,
+                "conversations": conversations,
+                "projects": projects,
+                "tasks": tasks
+            }
+
+    def clear_user_workspace(self, user_id):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM messages WHERE user_id = ?", (user_id,))
+            cursor.execute("DELETE FROM conversations WHERE user_id = ?", (user_id,))
+            cursor.execute("DELETE FROM memories WHERE user_id = ?", (user_id,))
+            cursor.execute("DELETE FROM projects WHERE user_id = ?", (user_id,))
+            cursor.execute("DELETE FROM tasks WHERE user_id = ?", (user_id,))
             conn.commit()
 
 db = Database()

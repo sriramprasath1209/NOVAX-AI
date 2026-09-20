@@ -1236,6 +1236,559 @@ HTML_PAGE = r"""<!DOCTYPE html>
       0%, 80%, 100% { transform: scale(0.2); opacity: 0.2; }
       40% { transform: scale(1); opacity: 1; }
     }
+
+    /* =========================================================
+       TASK CHECKLIST MODULE STYLING
+       ========================================================= */
+    .task-checklist-wrapper {
+      max-width: 950px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-bottom: 40px;
+    }
+
+    .task-header-banner {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 22px 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .task-stats-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .task-stat-card {
+      background: rgba(17, 24, 39, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      min-width: 100px;
+    }
+
+    .task-stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--novax-muted);
+    }
+
+    .task-stat-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--novax-text);
+      margin-top: 2px;
+    }
+
+    .task-progress-card {
+      background: linear-gradient(135deg, rgba(22, 27, 46, 0.7) 0%, rgba(15, 20, 36, 0.8) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .task-progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .task-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6366F1 0%, #22D3EE 60%, #10B981 100%);
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+    }
+
+    .task-create-box {
+      background: linear-gradient(135deg, rgba(22, 27, 46, 0.85) 0%, rgba(15, 20, 36, 0.95) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 16px;
+      padding: 18px 20px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .task-create-inputs {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .task-tag-select {
+      background: rgba(10, 14, 26, 0.85);
+      border: 1px solid var(--novax-border);
+      border-radius: 12px;
+      color: var(--novax-text);
+      padding: 10px 14px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      min-width: 130px;
+    }
+    .task-tag-select:focus {
+      border-color: var(--novax-cyan);
+    }
+
+    .task-presets-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--novax-muted);
+    }
+
+    .task-preset-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 4px 10px;
+      color: var(--novax-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .task-preset-chip:hover {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: var(--novax-cyan);
+      transform: translateY(-1px);
+    }
+
+    .task-filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .task-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--novax-border);
+      border-radius: 12px;
+      padding: 4px;
+    }
+
+    .task-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--novax-muted);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .task-tab-btn:hover {
+      color: var(--novax-text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .task-tab-btn.active {
+      background: var(--novax-nav-active-bg);
+      border: 1px solid var(--novax-nav-active-border);
+      color: var(--novax-cyan);
+      font-weight: 600;
+    }
+
+    .task-tab-badge {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    .task-tab-btn.active .task-tab-badge {
+      background: rgba(34, 211, 238, 0.2);
+      color: var(--novax-cyan);
+    }
+
+    .task-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-item-card {
+      background: rgba(17, 24, 39, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .task-item-card:hover {
+      background: rgba(22, 32, 54, 0.85);
+      border-color: rgba(99, 102, 241, 0.35);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .task-item-card.completed {
+      background: rgba(13, 20, 32, 0.5);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .task-tick-btn {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all 0.2s ease;
+      padding: 0;
+      color: transparent;
+    }
+
+    .task-tick-btn:hover {
+      border-color: var(--novax-cyan);
+      background: rgba(34, 211, 238, 0.12);
+      transform: scale(1.08);
+    }
+
+    .task-item-card.completed .task-tick-btn {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      border-color: #10B981;
+      color: white;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--novax-text);
+      word-break: break-word;
+      transition: all 0.2s ease;
+    }
+
+    .task-item-card.completed .task-title {
+      text-decoration: line-through;
+      color: var(--novax-muted);
+      opacity: 0.75;
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--novax-muted);
+    }
+
+    .task-tag-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: capitalize;
+    }
+
+    .task-tag-urgent {
+      background: rgba(239, 68, 68, 0.15);
+      color: #FCA5A5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .task-tag-work {
+      background: rgba(99, 102, 241, 0.15);
+      color: #A5B4FC;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .task-tag-study {
+      background: rgba(34, 211, 238, 0.15);
+      color: #67E8F9;
+      border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+    .task-tag-personal {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6EE7B7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .task-tag-general {
+      background: rgba(148, 163, 184, 0.15);
+      color: #CBD5E1;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .task-status-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .task-status-completed {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .task-status-pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: #FBBF24;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .task-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .task-btn-action {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: var(--novax-muted);
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .task-btn-action:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--novax-text);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .task-btn-action.delete:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+    }
+
+    /* =========================================================
+       SETTINGS MODULE STYLING
+       ========================================================= */
+    .settings-wrapper {
+      max-width: 850px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-bottom: 50px;
+    }
+
+    .settings-banner {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 22px 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .settings-card {
+      background: var(--novax-surface);
+      border: 1px solid var(--novax-border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .settings-card-header {
+      border-bottom: 1px solid var(--novax-border-light);
+      padding-bottom: 12px;
+    }
+
+    .settings-card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--novax-text);
+      margin: 0 0 4px 0;
+    }
+
+    .settings-card-desc {
+      font-size: 13px;
+      color: var(--novax-muted);
+      margin: 0;
+    }
+
+    .settings-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .settings-label-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-width: 480px;
+    }
+
+    .settings-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--novax-text);
+    }
+
+    .settings-sublabel {
+      font-size: 12px;
+      color: var(--novax-muted);
+      line-height: 1.4;
+    }
+
+    /* Toggle Switch */
+    .switch-container {
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      gap: 10px;
+    }
+
+    .switch-track {
+      width: 44px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      position: relative;
+      transition: background 0.25s ease;
+    }
+
+    .switch-track.active {
+      background: var(--novax-primary);
+    }
+
+    .switch-knob {
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.25s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .switch-track.active .switch-knob {
+      transform: translateX(20px);
+    }
+
+    .settings-feedback {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: none;
+    }
+    .settings-feedback.success {
+      display: block;
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--novax-success);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+    .settings-feedback.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.12);
+      color: #FCA5A5;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    /* Themes & Typography Classes */
+    body.theme-midnight {
+      --novax-bg: #0A0E1A;
+      --novax-sidebar: #0F172A;
+      --novax-surface: #1E293B;
+      --novax-border: #334155;
+    }
+    body.theme-oled {
+      --novax-bg: #000000;
+      --novax-sidebar: #050505;
+      --novax-surface: #0C0C0C;
+      --novax-border: #1F1F1F;
+    }
+    body.font-large {
+      font-size: 16px;
+    }
+    body.font-large .chat-bubble {
+      font-size: 16px;
+    }
+    body.font-large .task-title {
+      font-size: 17px;
+    }
   </style>
 </head>
 <body>
@@ -1367,19 +1920,19 @@ HTML_PAGE = r"""<!DOCTYPE html>
           <div class="nav-item" id="nav-item-conversations-panel" onclick="showPanel('conversations-panel')">
             <span>Conversations</span>
           </div>
-          <div class="nav-item" onclick="showPanel('memory-panel')">
+          <div class="nav-item" id="nav-item-memory-panel" onclick="showPanel('memory-panel')">
             <span>Memory</span>
           </div>
-          <div class="nav-item" onclick="showPanel('projects-panel')">
+          <div class="nav-item" id="nav-item-projects-panel" onclick="showPanel('projects-panel')">
             <span>Projects</span>
           </div>
-          <div class="nav-item" onclick="showPanel('tasks-panel')">
+          <div class="nav-item" id="nav-item-tasks-panel" onclick="showPanel('tasks-panel')">
             <span>Tasks</span>
           </div>
         </div>
 
         <div class="nav-section">
-          <div class="nav-item" onclick="alert('Settings view loaded.')">
+          <div class="nav-item" id="nav-item-settings-panel" onclick="showPanel('settings-panel')">
             <span>Settings</span>
           </div>
         </div>
@@ -1545,13 +2098,255 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
         <!-- Tasks Panel -->
         <div id="tasks-panel" class="panel-view">
-          <h2 style="color:var(--novax-cyan); margin-top:0;">Your Personal Tasks</h2>
-          <p style="color:var(--novax-muted); font-size:14px;">Manage your daily priorities safely.</p>
-          <div id="tasks-grid" class="card-grid">
-            <div class="data-card">
-              <h3>Personal AI Setup</h3>
-              <p>Configure personal preferences and memories in NOVAX.</p>
+          <div class="task-checklist-wrapper">
+
+            <!-- Banner Header -->
+            <div class="task-header-banner">
+              <div>
+                <h1 style="font-size:24px; font-weight:800; color:var(--novax-text); margin:0 0 6px 0; display:flex; align-items:center; gap:10px;">
+                  <span>Task Checklist</span>
+                  <span style="font-size:12px; font-weight:600; padding:3px 10px; border-radius:20px; background:rgba(34,211,238,0.15); color:var(--novax-cyan); border:1px solid rgba(34,211,238,0.3);">Productivity</span>
+                </h1>
+                <p style="color:var(--novax-text-secondary); font-size:14px; margin:0;">
+                  Create items, stay focused, and check off completed tasks.
+                </p>
+              </div>
+
+              <!-- Stats Cards -->
+              <div class="task-stats-bar">
+                <div class="task-stat-card">
+                  <span class="task-stat-label">Total</span>
+                  <span class="task-stat-val" id="task-stat-total">0</span>
+                </div>
+                <div class="task-stat-card">
+                  <span class="task-stat-label">Pending</span>
+                  <span class="task-stat-val" id="task-stat-pending" style="color:#FBBF24;">0</span>
+                </div>
+                <div class="task-stat-card">
+                  <span class="task-stat-label">Completed</span>
+                  <span class="task-stat-val" id="task-stat-completed" style="color:#34D399;">0</span>
+                </div>
+              </div>
             </div>
+
+            <!-- Progress Bar Widget -->
+            <div class="task-progress-card">
+              <div class="task-progress-header">
+                <span style="color:var(--novax-text); font-weight:600; display:flex; align-items:center; gap:6px;">
+                  <span>Completion Progress</span>
+                </span>
+                <span id="task-progress-percentage" style="font-weight:700; color:var(--novax-cyan);">0%</span>
+              </div>
+              <div class="task-progress-track">
+                <div id="task-progress-fill" class="task-progress-fill"></div>
+              </div>
+            </div>
+
+            <!-- Add Task Creator Box -->
+            <div class="task-create-box">
+              <div class="task-create-inputs">
+                <input 
+                  type="text" 
+                  id="new-task-title-input" 
+                  class="form-control" 
+                  style="flex:1; min-width:240px;" 
+                  placeholder="Enter a new task to do (e.g. Implement data processing pipeline)..." 
+                  onkeydown="if(event.key==='Enter') addQuickTask()" 
+                />
+                <select id="new-task-tag-select" class="task-tag-select">
+                  <option value="General">General</option>
+                  <option value="Work">Work</option>
+                  <option value="Study">Study</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="Coding">Coding</option>
+                </select>
+                <button class="btn-primary" onclick="addQuickTask()" style="padding:10px 22px; width:auto; font-weight:600; font-size:13px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;">
+                  + Add Task
+                </button>
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="task-presets-bar">
+                <span>Quick add:</span>
+                <button class="task-preset-chip" onclick="addPresetTask('Code review & commit changes', 'Coding')">+ Code Review</button>
+                <button class="task-preset-chip" onclick="addPresetTask('Read research paper on AI agents', 'Study')">+ AI Paper</button>
+                <button class="task-preset-chip" onclick="addPresetTask('Daily team sync & roadmap', 'Work')">+ Daily Sync</button>
+                <button class="task-preset-chip" onclick="addPresetTask('Review project architecture', 'Personal')">+ Architecture</button>
+              </div>
+            </div>
+
+            <!-- Filter & Search Controls -->
+            <div class="task-filter-bar">
+              <div class="task-tabs">
+                <button class="task-tab-btn active" id="task-tab-all" onclick="setTaskFilter('all')">
+                  All <span class="task-tab-badge" id="task-count-all">0</span>
+                </button>
+                <button class="task-tab-btn" id="task-tab-pending" onclick="setTaskFilter('pending')">
+                  Active <span class="task-tab-badge" id="task-count-pending">0</span>
+                </button>
+                <button class="task-tab-btn" id="task-tab-completed" onclick="setTaskFilter('completed')">
+                  Completed <span class="task-tab-badge" id="task-count-completed">0</span>
+                </button>
+              </div>
+
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <input 
+                  type="text" 
+                  id="search-tasks-input" 
+                  class="form-control" 
+                  style="width:220px;" 
+                  placeholder="Search checklist..." 
+                  oninput="filterTasks()" 
+                />
+                <button 
+                  id="btn-clear-completed-tasks" 
+                  class="btn-logout" 
+                  onclick="clearCompletedTasksAction()" 
+                  style="display:none; color:#FCA5A5; border-color:rgba(239,68,68,0.4); padding:8px 14px; font-weight:500;"
+                >
+                  Clear Completed
+                </button>
+              </div>
+            </div>
+
+            <!-- Tasks Checklist Container -->
+            <div id="tasks-checklist-container" class="task-list-container"></div>
+
+          </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="panel-view">
+          <div class="settings-wrapper">
+
+            <!-- Banner Header -->
+            <div class="settings-banner">
+              <div>
+                <h1 style="font-size:24px; font-weight:800; color:var(--novax-text); margin:0 0 6px 0;">
+                  Settings
+                </h1>
+                <p style="color:var(--novax-text-secondary); font-size:14px; margin:0;">
+                  Manage your account, AI behavior, appearance, and workspace data.
+                </p>
+              </div>
+            </div>
+
+            <!-- Card 1: Account & Profile -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h2 class="settings-card-title">Account & Profile</h2>
+                <p class="settings-card-desc">Your personal identity and login credentials.</p>
+              </div>
+
+              <div id="profile-settings-feedback" class="settings-feedback"></div>
+
+              <div class="settings-field-group">
+                <div class="settings-row">
+                  <div class="settings-label-group">
+                    <span class="settings-label">Display Name</span>
+                    <span class="settings-sublabel">Your name as recognized by NOVAX during conversations.</span>
+                  </div>
+                  <input type="text" id="settings-name-input" class="form-control" style="width:240px;" placeholder="Your Name" />
+                </div>
+
+                <div class="settings-row">
+                  <div class="settings-label-group">
+                    <span class="settings-label">Email Address</span>
+                    <span class="settings-sublabel">Registered account email.</span>
+                  </div>
+                  <span id="settings-email-display" style="font-size:13px; color:var(--novax-muted); background:rgba(255,255,255,0.04); padding:6px 12px; border-radius:8px; border:1px solid var(--novax-border);">email@example.com</span>
+                </div>
+
+                <div class="settings-row">
+                  <div class="settings-label-group">
+                    <span class="settings-label">Change Password</span>
+                    <span class="settings-sublabel">Leave blank if you do not wish to change your password.</span>
+                  </div>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <input type="password" id="settings-password-input" class="form-control" style="width:240px;" placeholder="New Password" />
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+                  <button class="btn-primary" onclick="saveProfileSettings()" style="width:auto; padding:8px 20px; font-weight:600; font-size:13px;">
+                    Save Profile
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: AI Response Style -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h2 class="settings-card-title">AI Response Style</h2>
+                <p class="settings-card-desc">Control how NOVAX reasons and answers your messages.</p>
+              </div>
+
+              <div id="ai-settings-feedback" class="settings-feedback"></div>
+
+              <div class="settings-field-group">
+                <div class="settings-row">
+                  <div class="settings-label-group">
+                    <span class="settings-label">Response Mode</span>
+                    <span class="settings-sublabel">Choose how concise or detailed answers should be.</span>
+                  </div>
+                  <select id="settings-response-style-select" class="form-control" style="width:240px; cursor:pointer;" onchange="saveAISettings()">
+                    <option value="default">Default (Balanced & Helpful)</option>
+                    <option value="concise">Concise (Direct & Short)</option>
+                    <option value="code_first">Code-First (Code Centric)</option>
+                    <option value="in_depth">In-Depth (Detailed Analysis)</option>
+                  </select>
+                </div>
+
+                <div class="settings-row">
+                  <div class="settings-label-group">
+                    <span class="settings-label">Live Web Search</span>
+                    <span class="settings-sublabel">Allow NOVAX to look up current live facts and news feeds.</span>
+                  </div>
+                  <div class="switch-container" onclick="toggleWebSearchSetting()">
+                    <div id="settings-search-track" class="switch-track active">
+                      <div class="switch-knob"></div>
+                    </div>
+                    <span id="settings-search-status" style="font-size:13px; color:var(--novax-text-secondary); min-width:60px;">Enabled</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Appearance -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h2 class="settings-card-title">Appearance</h2>
+                <p class="settings-card-desc">Personalize your workspace visual theme and typography.</p>
+              </div>
+
+              <div class="settings-field-group">
+                <div class="settings-row">
+                  <div class="settings-label-group">
+                    <span class="settings-label">Color Theme</span>
+                    <span class="settings-sublabel">Select your preferred background palette.</span>
+                  </div>
+                  <select id="settings-theme-select" class="form-control" style="width:240px; cursor:pointer;" onchange="applyAndSaveAppearance()">
+                    <option value="dark">Dark Theme (Default)</option>
+                    <option value="midnight">Midnight Navy</option>
+                    <option value="oled">OLED Pure Black</option>
+                  </select>
+                </div>
+
+                <div class="settings-row">
+                  <div class="settings-label-group">
+                    <span class="settings-label">Font Size</span>
+                    <span class="settings-sublabel">Adjust reading comfort across the interface.</span>
+                  </div>
+                  <select id="settings-font-size-select" class="form-control" style="width:240px; cursor:pointer;" onchange="applyAndSaveAppearance()">
+                    <option value="normal">Normal</option>
+                    <option value="large">Large</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1589,9 +2384,21 @@ HTML_PAGE = r"""<!DOCTYPE html>
         if (navItem) navItem.classList.add('active');
         loadConversationsList();
       } else if (panelId === 'projects-panel') {
+        const navItem = document.getElementById('nav-item-projects-panel');
+        if (navItem) navItem.classList.add('active');
         loadProjectsList();
       } else if (panelId === 'memory-panel') {
+        const navItem = document.getElementById('nav-item-memory-panel');
+        if (navItem) navItem.classList.add('active');
         loadMemories();
+      } else if (panelId === 'tasks-panel') {
+        const navItem = document.getElementById('nav-item-tasks-panel');
+        if (navItem) navItem.classList.add('active');
+        loadTasksList();
+      } else if (panelId === 'settings-panel') {
+        const navItem = document.getElementById('nav-item-settings-panel');
+        if (navItem) navItem.classList.add('active');
+        loadSettings();
       }
     }
 
@@ -1986,6 +2793,476 @@ HTML_PAGE = r"""<!DOCTYPE html>
           filterProjects();
         }
       } catch (e) {}
+    }
+
+    // =========================================================
+    // TASK CHECKLIST MODULE JAVASCRIPT
+    // =========================================================
+    let allTasksCache = [];
+    let currentTaskFilter = 'all';
+
+    async function loadTasksList() {
+      try {
+        const res = await fetch('/api/tasks');
+        if (!res.ok) return;
+        const tasks = await res.json();
+        allTasksCache = tasks || [];
+        filterTasks();
+      } catch (e) {}
+    }
+
+    function setTaskFilter(filter) {
+      currentTaskFilter = filter;
+      document.querySelectorAll('.task-tab-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById('task-tab-' + filter);
+      if (activeBtn) activeBtn.classList.add('active');
+      filterTasks();
+    }
+
+    function filterTasks() {
+      const q = (document.getElementById('search-tasks-input')?.value || '').toLowerCase().trim();
+      let list = allTasksCache.slice();
+
+      if (currentTaskFilter === 'pending') {
+        list = list.filter(t => !t.completed);
+      } else if (currentTaskFilter === 'completed') {
+        list = list.filter(t => !!t.completed);
+      }
+
+      if (q) {
+        list = list.filter(t => 
+          (t.title || '').toLowerCase().includes(q) ||
+          (t.tag || '').toLowerCase().includes(q)
+        );
+      }
+
+      updateTaskStats(allTasksCache);
+      renderTasksChecklist(list);
+    }
+
+    function updateTaskStats(tasks) {
+      const total = tasks.length;
+      const completed = tasks.filter(t => !!t.completed).length;
+      const pending = total - completed;
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      const totalEl = document.getElementById('task-stat-total');
+      const pendingEl = document.getElementById('task-stat-pending');
+      const completedEl = document.getElementById('task-stat-completed');
+      const countAll = document.getElementById('task-count-all');
+      const countPending = document.getElementById('task-count-pending');
+      const countCompleted = document.getElementById('task-count-completed');
+      const pctEl = document.getElementById('task-progress-percentage');
+      const fillEl = document.getElementById('task-progress-fill');
+      const clearBtn = document.getElementById('btn-clear-completed-tasks');
+
+      if (totalEl) totalEl.innerText = total;
+      if (pendingEl) pendingEl.innerText = pending;
+      if (completedEl) completedEl.innerText = completed;
+      if (countAll) countAll.innerText = total;
+      if (countPending) countPending.innerText = pending;
+      if (countCompleted) countCompleted.innerText = completed;
+      if (pctEl) pctEl.innerText = `${pct}%`;
+      if (fillEl) fillEl.style.width = `${pct}%`;
+
+      if (clearBtn) {
+        clearBtn.style.display = completed > 0 ? 'inline-block' : 'none';
+      }
+    }
+
+    function getTagPillClass(tag) {
+      const lower = (tag || '').toLowerCase();
+      if (lower.includes('urgent')) return 'task-tag-urgent';
+      if (lower.includes('work')) return 'task-tag-work';
+      if (lower.includes('study') || lower.includes('read')) return 'task-tag-study';
+      if (lower.includes('personal')) return 'task-tag-personal';
+      return 'task-tag-general';
+    }
+
+    function renderTasksChecklist(tasks) {
+      const container = document.getElementById('tasks-checklist-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!tasks || tasks.length === 0) {
+        let msg = 'No tasks in this view yet.';
+        let sub = 'Type a task above and press Enter or "+ Add Task" to get started!';
+        if (currentTaskFilter === 'completed') {
+          msg = 'No completed tasks yet';
+          sub = 'Check off items in your active tasks list to see them here.';
+        } else if (currentTaskFilter === 'pending') {
+          msg = 'All caught up!';
+          sub = 'No pending tasks right now. Great job!';
+        }
+
+        container.innerHTML = `
+          <div style="background: rgba(18, 24, 38, 0.6); backdrop-filter: blur(12px); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 36px 20px; text-align: center;">
+            <h3 style="color: var(--novax-text); font-size: 16px; margin: 0 0 6px 0;">${msg}</h3>
+            <p style="color: var(--novax-muted); font-size: 13px; margin: 0;">${sub}</p>
+          </div>
+        `;
+        return;
+      }
+
+      tasks.forEach(task => {
+        const isDone = !!task.completed;
+        const card = document.createElement('div');
+        card.className = `task-item-card ${isDone ? 'completed' : ''}`;
+        card.id = `task-card-${task.id}`;
+
+        const createdDate = task.created_at ? new Date(task.created_at * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+        const tagClass = getTagPillClass(task.tag);
+
+        card.innerHTML = `
+          <button class="task-tick-btn" onclick="toggleTaskChecklist('${task.id}', ${isDone})" title="${isDone ? 'Mark as Incomplete' : 'Mark as Completed'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:${isDone ? 'block' : 'none'};">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+
+          <div class="task-content">
+            <div class="task-title">${escapeHtml(task.title)}</div>
+            <div class="task-meta">
+              <span class="task-tag-pill ${tagClass}">${escapeHtml(task.tag || 'General')}</span>
+              ${isDone 
+                ? '<span class="task-status-pill task-status-completed">✓ Completed</span>' 
+                : '<span class="task-status-pill task-status-pending">○ Pending</span>'
+              }
+              ${createdDate ? `<span>• ${createdDate}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="task-actions">
+            <button class="task-btn-action" onclick="editTaskPrompt('${task.id}', '${escapeHtml(task.title).replace(/'/g, "\\'")}', '${escapeHtml(task.tag || 'General').replace(/'/g, "\\'")}')" title="Edit Task">
+              Edit
+            </button>
+            <button class="task-btn-action delete" onclick="deleteTaskAction('${task.id}')" title="Delete Task">
+              Delete
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function addQuickTask() {
+      const input = document.getElementById('new-task-title-input');
+      const tagSelect = document.getElementById('new-task-tag-select');
+      if (!input) return;
+      const title = input.value.trim();
+      if (!title) {
+        input.focus();
+        return;
+      }
+      const tag = tagSelect ? tagSelect.value : 'General';
+
+      try {
+        const res = await fetch('/api/tasks/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, tag })
+        });
+        const data = await res.json();
+        if (data.success) {
+          input.value = '';
+          allTasksCache = data.tasks || [];
+          filterTasks();
+        } else {
+          alert('Failed to create task: ' + (data.error || 'Server error'));
+        }
+      } catch (e) {
+        alert('Failed to add task. Please try again.');
+      }
+    }
+
+    async function addPresetTask(title, tag) {
+      try {
+        const res = await fetch('/api/tasks/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, tag })
+        });
+        const data = await res.json();
+        if (data.success) {
+          allTasksCache = data.tasks || [];
+          filterTasks();
+        }
+      } catch (e) {}
+    }
+
+    async function toggleTaskChecklist(taskId, currentCompleted) {
+      try {
+        const newStatus = !currentCompleted;
+        const res = await fetch('/api/tasks/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: taskId, completed: newStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+          allTasksCache = data.tasks || [];
+          filterTasks();
+        }
+      } catch (e) {}
+    }
+
+    async function editTaskPrompt(taskId, currentTitle, currentTag) {
+      const newTitle = prompt('Edit task name:', currentTitle);
+      if (newTitle === null) return;
+      const trimmedTitle = newTitle.trim();
+      if (!trimmedTitle) {
+        alert('Task title cannot be empty.');
+        return;
+      }
+      const newTag = prompt('Edit category/tag (e.g. Work, Study, Personal, Urgent, Coding):', currentTag);
+      const trimmedTag = newTag !== null ? newTag.trim() : currentTag;
+
+      try {
+        const res = await fetch('/api/tasks/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: taskId, title: trimmedTitle, tag: trimmedTag || 'General' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          allTasksCache = data.tasks || [];
+          filterTasks();
+        }
+      } catch (e) {
+        alert('Failed to update task.');
+      }
+    }
+
+    async function deleteTaskAction(taskId) {
+      if (!confirm('Are you sure you want to delete this checklist item?')) return;
+      try {
+        const res = await fetch('/api/tasks/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: taskId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          allTasksCache = data.tasks || [];
+          filterTasks();
+        }
+      } catch (e) {
+        alert('Failed to delete task.');
+      }
+    }
+
+    async function clearCompletedTasksAction() {
+      if (!confirm('Are you sure you want to remove all completed tasks from your checklist?')) return;
+      try {
+        const res = await fetch('/api/tasks/clear_completed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.success) {
+          allTasksCache = data.tasks || [];
+          filterTasks();
+        }
+      } catch (e) {
+        alert('Failed to clear completed tasks.');
+      }
+    }
+
+    // =========================================================
+    // SETTINGS MODULE JAVASCRIPT
+    // =========================================================
+    let currentSettingsData = {
+      response_style: 'default',
+      web_search: true,
+      theme: 'dark',
+      font_size: 'normal'
+    };
+
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success) {
+          if (data.user) {
+            const nameInp = document.getElementById('settings-name-input');
+            const emailDisp = document.getElementById('settings-email-display');
+            if (nameInp) nameInp.value = data.user.name || '';
+            if (emailDisp) emailDisp.innerText = data.user.email || '';
+          }
+          if (data.settings) {
+            currentSettingsData = data.settings;
+            const styleSelect = document.getElementById('settings-response-style-select');
+            const themeSelect = document.getElementById('settings-theme-select');
+            const fontSelect = document.getElementById('settings-font-size-select');
+            const searchTrack = document.getElementById('settings-search-track');
+            const searchStatus = document.getElementById('settings-search-status');
+
+            if (styleSelect) styleSelect.value = data.settings.response_style || 'default';
+            if (themeSelect) themeSelect.value = data.settings.theme || 'dark';
+            if (fontSelect) fontSelect.value = data.settings.font_size || 'normal';
+
+            const isSearchOn = data.settings.web_search !== false;
+            if (searchTrack) {
+              searchTrack.className = 'switch-track ' + (isSearchOn ? 'active' : '');
+            }
+            if (searchStatus) {
+              searchStatus.innerText = isSearchOn ? 'Enabled' : 'Disabled';
+            }
+
+            applyAppearance(data.settings.theme, data.settings.font_size);
+          }
+        }
+      } catch (e) {}
+    }
+
+    function applyAppearance(theme, fontSize) {
+      document.body.classList.remove('theme-midnight', 'theme-oled', 'font-large');
+      if (theme === 'midnight') document.body.classList.add('theme-midnight');
+      if (theme === 'oled') document.body.classList.add('theme-oled');
+      if (fontSize === 'large') document.body.classList.add('font-large');
+    }
+
+    async function applyAndSaveAppearance() {
+      const themeSelect = document.getElementById('settings-theme-select');
+      const fontSelect = document.getElementById('settings-font-size-select');
+      const theme = themeSelect ? themeSelect.value : 'dark';
+      const fontSize = fontSelect ? fontSelect.value : 'normal';
+
+      applyAppearance(theme, fontSize);
+
+      try {
+        await fetch('/api/settings/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme: theme, font_size: fontSize })
+        });
+      } catch (e) {}
+    }
+
+    async function toggleWebSearchSetting() {
+      const current = currentSettingsData.web_search !== false;
+      const next = !current;
+      currentSettingsData.web_search = next;
+
+      const searchTrack = document.getElementById('settings-search-track');
+      const searchStatus = document.getElementById('settings-search-status');
+      if (searchTrack) searchTrack.className = 'switch-track ' + (next ? 'active' : '');
+      if (searchStatus) searchStatus.innerText = next ? 'Enabled' : 'Disabled';
+
+      await saveAISettings();
+    }
+
+    async function saveAISettings() {
+      const styleSelect = document.getElementById('settings-response-style-select');
+      const responseStyle = styleSelect ? styleSelect.value : 'default';
+      const webSearch = currentSettingsData.web_search !== false;
+      const feedback = document.getElementById('ai-settings-feedback');
+
+      try {
+        const res = await fetch('/api/settings/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ response_style: responseStyle, web_search: webSearch })
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentSettingsData = data.settings;
+          if (feedback) {
+            feedback.className = 'settings-feedback success';
+            feedback.innerText = 'AI preferences saved and active for subsequent responses.';
+            setTimeout(() => { feedback.style.display = 'none'; feedback.className = 'settings-feedback'; }, 3000);
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function saveProfileSettings() {
+      const nameInp = document.getElementById('settings-name-input');
+      const pwdInp = document.getElementById('settings-password-input');
+      const feedback = document.getElementById('profile-settings-feedback');
+      const name = nameInp ? nameInp.value.trim() : '';
+      const pwd = pwdInp ? pwdInp.value.trim() : '';
+
+      if (!name) {
+        if (feedback) {
+          feedback.className = 'settings-feedback error';
+          feedback.innerText = 'Display name cannot be empty.';
+        }
+        return;
+      }
+
+      try {
+        const payload = { name: name };
+        if (pwd) payload.password = pwd;
+
+        const res = await fetch('/api/settings/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (currentUser) currentUser.name = name;
+          updateUserProfileUI();
+          if (pwdInp) pwdInp.value = '';
+          if (feedback) {
+            feedback.className = 'settings-feedback success';
+            feedback.innerText = 'Profile details updated successfully.';
+            setTimeout(() => { feedback.style.display = 'none'; feedback.className = 'settings-feedback'; }, 3000);
+          }
+        } else {
+          if (feedback) {
+            feedback.className = 'settings-feedback error';
+            feedback.innerText = data.error || 'Failed to update profile.';
+          }
+        }
+      } catch (e) {
+        if (feedback) {
+          feedback.className = 'settings-feedback error';
+          feedback.innerText = 'Failed to update profile.';
+        }
+      }
+    }
+
+    async function exportDataAction() {
+      try {
+        const res = await fetch('/api/settings/export');
+        if (!res.ok) return;
+        const data = await res.json();
+        const jsonStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `novax_workspace_backup_${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Failed to export data.');
+      }
+    }
+
+    async function clearDataAction() {
+      if (!confirm('Are you sure you want to permanently clear ALL your workspace data (conversations, memories, projects, tasks)? This action cannot be undone.')) return;
+      try {
+        const res = await fetch('/api/settings/clear_data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Workspace data cleared successfully.');
+          loadConversationsList();
+          startNewChat();
+        }
+      } catch (e) {
+        alert('Failed to clear workspace data.');
+      }
     }
 
     async function openConversation(convId) {
@@ -2988,6 +4265,28 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(tasks)
             return
 
+        elif parsed.path == "/api/settings":
+            user = self._get_authenticated_user()
+            if not user:
+                self._send_json({"error": "Unauthorized"}, status=401)
+                return
+            settings = db.get_user_settings(user["id"])
+            self._send_json({
+                "success": True,
+                "user": {"id": user["id"], "name": user["name"], "email": user["email"]},
+                "settings": settings
+            })
+            return
+
+        elif parsed.path == "/api/settings/export":
+            user = self._get_authenticated_user()
+            if not user:
+                self._send_json({"error": "Unauthorized"}, status=401)
+                return
+            data = db.export_user_data(user["id"])
+            self._send_json(data)
+            return
+
         self._send_json({"error": "not found"}, status=404)
 
     def do_POST(self):
@@ -3178,6 +4477,82 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             db.delete_project(project_id, user["id"])
             projects = db.get_user_projects(user["id"])
             self._send_json({"success": True, "projects": projects})
+            return
+
+        elif parsed.path == "/api/tasks/create":
+            title = (data.get("title") or "").strip()
+            if not title:
+                self._send_json({"error": "title is required"}, status=400)
+                return
+            task_id = "task_" + str(int(time.time())) + "_" + os.urandom(4).hex()
+            tag = (data.get("tag") or "General").strip()
+            db.create_task(task_id, user["id"], title, tag)
+            tasks = db.get_user_tasks(user["id"])
+            self._send_json({"success": True, "tasks": tasks})
+            return
+
+        elif parsed.path == "/api/tasks/toggle":
+            task_id = data.get("id")
+            completed = data.get("completed", False)
+            if not task_id:
+                self._send_json({"error": "id is required"}, status=400)
+                return
+            db.toggle_task(task_id, user["id"], completed)
+            tasks = db.get_user_tasks(user["id"])
+            self._send_json({"success": True, "tasks": tasks})
+            return
+
+        elif parsed.path == "/api/tasks/update":
+            task_id = data.get("id")
+            title = (data.get("title") or "").strip()
+            tag = data.get("tag")
+            if not task_id or not title:
+                self._send_json({"error": "id and title are required"}, status=400)
+                return
+            db.update_task(task_id, user["id"], title, tag)
+            tasks = db.get_user_tasks(user["id"])
+            self._send_json({"success": True, "tasks": tasks})
+            return
+
+        elif parsed.path == "/api/tasks/delete":
+            task_id = data.get("id")
+            if not task_id:
+                self._send_json({"error": "id is required"}, status=400)
+                return
+            db.delete_task(task_id, user["id"])
+            tasks = db.get_user_tasks(user["id"])
+            self._send_json({"success": True, "tasks": tasks})
+            return
+
+        elif parsed.path == "/api/tasks/clear_completed":
+            db.clear_completed_tasks(user["id"])
+            tasks = db.get_user_tasks(user["id"])
+            self._send_json({"success": True, "tasks": tasks})
+            return
+
+        elif parsed.path == "/api/settings/update":
+            response_style = data.get("response_style")
+            web_search = data.get("web_search")
+            theme = data.get("theme")
+            font_size = data.get("font_size")
+            updated = db.update_user_settings(user["id"], response_style=response_style, web_search=web_search, theme=theme, font_size=font_size)
+            self._send_json({"success": True, "settings": updated})
+            return
+
+        elif parsed.path == "/api/settings/profile":
+            name = (data.get("name") or "").strip()
+            password = data.get("password")
+            if not name and not password:
+                self._send_json({"error": "No updates provided"}, status=400)
+                return
+            pwd_hash, salt = auth.hash_password(password) if password else (None, None)
+            db.update_user_profile(user["id"], name=name or None, password_hash=pwd_hash, salt=salt)
+            self._send_json({"success": True, "name": name or user["name"]})
+            return
+
+        elif parsed.path == "/api/settings/clear_data":
+            db.clear_user_workspace(user["id"])
+            self._send_json({"success": True})
             return
 
         self._send_json({"error": "not found"}, status=404)
