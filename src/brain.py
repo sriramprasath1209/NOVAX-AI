@@ -1,3 +1,4 @@
+import re
 from src.ai_model import AIModel
 from src.conversation import Conversation
 from src.memory import MemoryManager
@@ -27,14 +28,22 @@ class Brain:
         if conversation_id:
             existing_conv = db.get_conversation(conversation_id, user_id)
             if not existing_conv:
-                # Auto-generate title from first user message
+                # Auto-generate title from first user message or attached document
                 title_text = user_message.strip()
+                if "[Attached Document:" in title_text:
+                    doc_match = re.search(r'\[Attached Document:\s*([^\]\(\n]+)', title_text)
+                    if doc_match:
+                        title_text = f"Doc: {doc_match.group(1).strip()}"
                 if len(title_text) > 35:
                     title_text = title_text[:35].strip() + "..."
                 title = (title_text[0].upper() + title_text[1:]) if title_text else "New Chat"
                 db.create_conversation(conversation_id, user_id, title=title)
             elif existing_conv.get("title") == "New Chat":
                 title_text = user_message.strip()
+                if "[Attached Document:" in title_text:
+                    doc_match = re.search(r'\[Attached Document:\s*([^\]\(\n]+)', title_text)
+                    if doc_match:
+                        title_text = f"Doc: {doc_match.group(1).strip()}"
                 if len(title_text) > 35:
                     title_text = title_text[:35].strip() + "..."
                 title = (title_text[0].upper() + title_text[1:]) if title_text else "New Chat"
@@ -196,8 +205,23 @@ class Brain:
                             )
                         }
 
+        # Document Analysis prompt enhancement
+        doc_context_message = None
+        if "[Attached Document:" in user_message or "--- Document Content ---" in user_message:
+            doc_context_message = {
+                "role": "system",
+                "content": (
+                    "[Document Analysis & Reasoning Directive]\n"
+                    "The user has attached a file/document. Carefully inspect, analyze, and comprehend all parts of the document content provided. "
+                    "Provide clear, thorough, structured, and helpful answers, summaries, code explanations, or data extraction based on the document. "
+                    "Do NOT use emojis in your response."
+                )
+            }
+
         user_messages = self.conversation.get_messages(user_id=user_id, conversation_id=conversation_id)
         messages_to_send = [user_context_message] + user_messages
+        if doc_context_message:
+            messages_to_send = [doc_context_message] + messages_to_send
         if search_context_message:
             messages_to_send = [search_context_message] + messages_to_send
 

@@ -8,6 +8,7 @@ from urllib.parse import urlparse, parse_qs
 from src.brain import Brain
 from src.db import db
 from src import auth
+from src.file_parser import parse_uploaded_file
 
 
 HTML_PAGE = r"""<!DOCTYPE html>
@@ -534,12 +535,178 @@ HTML_PAGE = r"""<!DOCTYPE html>
       border-bottom-left-radius: 4px;
     }
 
-    .chat-input-bar {
-      padding: 16px 24px;
+    .chat-footer-wrapper {
+      display: flex;
+      flex-direction: column;
+      background: var(--novax-sidebar);
       border-top: 1px solid var(--novax-border);
+    }
+
+
+    .chat-drop-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(8, 11, 20, 0.94);
+      border: 2px dashed var(--novax-cyan);
+      border-radius: 16px;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+    }
+
+    .chat-drop-overlay.active {
+      display: flex;
+    }
+
+    .drop-overlay-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--novax-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .drop-overlay-subtitle {
+      font-size: 13px;
+      color: var(--novax-text-secondary);
+    }
+
+    .chat-attachment-preview {
+      margin: 10px 24px 0 24px;
+      padding: 8px 14px;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .attachment-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .attachment-icon {
+      font-size: 10px;
+      font-weight: 800;
+      background: var(--novax-cyan);
+      color: #000;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .attachment-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--novax-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 280px;
+    }
+
+    .attachment-size {
+      font-size: 11px;
+      color: var(--novax-text-secondary);
+    }
+
+    .btn-remove-attachment {
+      background: transparent;
+      border: none;
+      color: var(--novax-text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .btn-remove-attachment:hover {
+      color: #ff5252;
+      background: rgba(255, 82, 82, 0.1);
+    }
+
+    .user-attached-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      padding: 5px 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      width: fit-content;
+    }
+
+    .user-badge-icon {
+      font-size: 9px;
+      font-weight: 800;
+      background: var(--novax-cyan);
+      color: #000;
+      padding: 2px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .user-badge-name {
+      font-weight: 600;
+      color: var(--novax-text);
+      max-width: 240px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-badge-size {
+      font-size: 11px;
+      color: var(--novax-text-secondary);
+    }
+
+    .user-message-text {
+      line-height: 1.5;
+    }
+
+    .chat-input-bar {
+      padding: 12px 24px 16px 24px;
       display: flex;
       gap: 12px;
-      background: var(--novax-sidebar);
+      align-items: center;
+      background: transparent;
+    }
+
+    .btn-attach {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--novax-border);
+      color: var(--novax-text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 0 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      white-space: nowrap;
+      height: 46px;
+    }
+
+    .btn-attach:hover {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: var(--novax-cyan);
+      color: var(--novax-cyan);
     }
 
     .chat-input {
@@ -565,6 +732,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       padding: 0 20px;
       font-weight: 600;
       cursor: pointer;
+      height: 46px;
     }
 
     /* Cards & Lists for Memory, Projects, Tasks */
@@ -1957,7 +2125,13 @@ HTML_PAGE = r"""<!DOCTYPE html>
         </div>
 
         <!-- Chat Panel -->
-        <div id="chat-panel" class="panel-view active">
+        <div id="chat-panel" class="panel-view active" style="position: relative;">
+          <!-- Drag and Drop Overlay -->
+          <div id="chat-drop-overlay" class="chat-drop-overlay">
+            <div class="drop-overlay-title">Drop file to attach & analyze</div>
+            <div class="drop-overlay-subtitle">PDF, Word, Code, Data, Text, Markdown, Images</div>
+          </div>
+
           <div id="chat-messages" class="chat-container">
             <div class="chat-bubble-wrapper assistant">
               <div class="chat-bubble assistant">
@@ -1965,9 +2139,26 @@ HTML_PAGE = r"""<!DOCTYPE html>
               </div>
             </div>
           </div>
-          <div class="chat-input-bar">
-            <input type="text" id="user-input" class="chat-input" placeholder="Type your message to NOVAX..." onkeydown="if(event.key==='Enter') sendMessage()" />
-            <button class="btn-send" onclick="sendMessage()">Send</button>
+          <div class="chat-footer-wrapper">
+
+            <!-- Attachment Preview Bar (hidden by default) -->
+            <div id="chat-attachment-preview" class="chat-attachment-preview" style="display: none;">
+              <div class="attachment-info">
+                <span id="attachment-icon" class="attachment-icon">FILE</span>
+                <span id="attachment-name" class="attachment-name"></span>
+                <span id="attachment-size" class="attachment-size"></span>
+              </div>
+              <button type="button" class="btn-remove-attachment" onclick="clearAttachedFile()" title="Remove file">✕</button>
+            </div>
+
+            <div class="chat-input-bar">
+              <input type="file" id="chat-file-input" style="display: none;" onchange="handleFileSelected(event)" />
+              <button type="button" class="btn-attach" onclick="document.getElementById('chat-file-input').click()" title="Attach Document, PDF, Code, or Data File">
+                + File
+              </button>
+              <input type="text" id="user-input" class="chat-input" placeholder="Ask NOVAX anything, manage tasks/projects, or discuss attached files..." onkeydown="if(event.key==='Enter') sendMessage()" />
+              <button class="btn-send" onclick="sendMessage()">Send</button>
+            </div>
           </div>
         </div>
 
@@ -3294,7 +3485,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       } catch (e) {}
     }
 
-    function appendMessageBubble(role, content, msgId) {
+    function appendMessageBubble(role, content, msgId, attachedFile) {
       const container = document.getElementById('chat-messages');
       const wrapper = document.createElement('div');
       wrapper.className = 'chat-bubble-wrapper ' + (role === 'user' ? 'user' : 'assistant');
@@ -3304,7 +3495,23 @@ HTML_PAGE = r"""<!DOCTYPE html>
       bubble.className = 'chat-bubble ' + (role === 'user' ? 'user' : 'assistant');
 
       if (role === 'user') {
-        bubble.innerText = content;
+        if (attachedFile) {
+          const badge = document.createElement('div');
+          badge.className = 'user-attached-badge';
+          badge.innerHTML = `
+            <span class="user-badge-icon">${attachedFile.badge_type || 'FILE'}</span>
+            <span class="user-badge-name">${escapeHtml(attachedFile.filename)}</span>
+            <span class="user-badge-size">(${attachedFile.formatted_size})</span>
+          `;
+          bubble.appendChild(badge);
+
+          const textEl = document.createElement('div');
+          textEl.className = 'user-message-text';
+          textEl.innerText = content;
+          bubble.appendChild(textEl);
+        } else {
+          bubble.innerText = content;
+        }
       } else {
         bubble.innerHTML = formatMessageText(content);
       }
@@ -3438,17 +3645,180 @@ HTML_PAGE = r"""<!DOCTYPE html>
       return html;
     }
 
+    let currentAttachedFile = null;
+
+    function handleFileSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      processFileUpload(file);
+      event.target.value = '';
+    }
+
+    async function processFileUpload(file) {
+      if (!file) return;
+
+      if (file.size > 25 * 1024 * 1024) {
+        alert('File is too large. Please select a file under 25MB.');
+        return;
+      }
+
+      const preview = document.getElementById('chat-attachment-preview');
+      const nameEl = document.getElementById('attachment-name');
+      const sizeEl = document.getElementById('attachment-size');
+      const iconEl = document.getElementById('attachment-icon');
+
+      // Immediate loading indicator
+      if (preview) {
+        nameEl.innerText = file.name;
+        sizeEl.innerText = '(uploading & parsing...)';
+        if (iconEl) iconEl.innerText = '...';
+        preview.style.display = 'flex';
+      }
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const dataUrl = e.target.result;
+        try {
+          const res = await fetch('/api/files/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              file_data: dataUrl,
+              file_size: file.size
+            })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            currentAttachedFile = data;
+            renderAttachmentPreview();
+          } else {
+            alert(data.error || 'Failed to parse file.');
+            clearAttachedFile();
+          }
+        } catch (err) {
+          // Client-side fallback
+          currentAttachedFile = {
+            filename: file.name,
+            badge_type: 'FILE',
+            formatted_size: formatFileSize(file.size),
+            text: file.name,
+            word_count: 0
+          };
+          renderAttachmentPreview();
+        }
+      };
+      reader.onerror = function() {
+        alert('Failed to read file.');
+        clearAttachedFile();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setupDragAndDrop() {
+      const chatPanel = document.getElementById('chat-panel');
+      const dropOverlay = document.getElementById('chat-drop-overlay');
+      if (!chatPanel) return;
+
+      let dragCounter = 0;
+
+      chatPanel.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter++;
+        if (dropOverlay) dropOverlay.classList.add('active');
+      }, false);
+
+      chatPanel.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+
+      chatPanel.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter--;
+        if (dragCounter <= 0) {
+          dragCounter = 0;
+          if (dropOverlay) dropOverlay.classList.remove('active');
+        }
+      }, false);
+
+      chatPanel.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter = 0;
+        if (dropOverlay) dropOverlay.classList.remove('active');
+
+        const dt = e.dataTransfer;
+        const files = dt && dt.files;
+        if (files && files.length > 0) {
+          processFileUpload(files[0]);
+        }
+      }, false);
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function renderAttachmentPreview() {
+      const preview = document.getElementById('chat-attachment-preview');
+      const nameEl = document.getElementById('attachment-name');
+      const sizeEl = document.getElementById('attachment-size');
+      const iconEl = document.getElementById('attachment-icon');
+
+      if (currentAttachedFile) {
+        nameEl.innerText = currentAttachedFile.filename;
+        let extra = currentAttachedFile.formatted_size;
+        if (currentAttachedFile.page_count) {
+          extra += ` • ${currentAttachedFile.page_count} page(s)`;
+        } else if (currentAttachedFile.word_count) {
+          extra += ` • ${currentAttachedFile.word_count} words`;
+        }
+        sizeEl.innerText = `(${extra})`;
+        if (iconEl) iconEl.innerText = currentAttachedFile.badge_type || 'FILE';
+        preview.style.display = 'flex';
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+
+    function clearAttachedFile() {
+      currentAttachedFile = null;
+      const fileInput = document.getElementById('chat-file-input');
+      if (fileInput) fileInput.value = '';
+      renderAttachmentPreview();
+    }
+
+
     async function sendMessage() {
       const input = document.getElementById('user-input');
       const text = input.value.trim();
-      if (!text) return;
+      if (!text && !currentAttachedFile) return;
+
+      const fileToSend = currentAttachedFile;
+      let userBubbleText = text;
+      let promptText = text;
+
+      if (fileToSend) {
+        if (!userBubbleText) {
+          userBubbleText = "Please analyze this attached document and provide a complete summary and key takeaways.";
+          promptText = `[Attached Document: ${fileToSend.filename} (${fileToSend.formatted_size})]\n--- Document Content ---\n${fileToSend.text}\n--- End Document Content ---\n\nPlease analyze this document and provide a complete summary and key takeaways.`;
+        } else {
+          promptText = `[Attached Document: ${fileToSend.filename} (${fileToSend.formatted_size})]\n--- Document Content ---\n${fileToSend.text}\n--- End Document Content ---\n\nUser Question:\n${text}`;
+        }
+        clearAttachedFile();
+      }
 
       if (!currentConversationId) {
         currentConversationId = generateConvId();
       }
 
       const container = document.getElementById('chat-messages');
-      appendMessageBubble('user', text, null);
+      appendMessageBubble('user', userBubbleText, null, fileToSend);
 
       input.value = '';
       container.scrollTop = container.scrollHeight;
@@ -3476,7 +3846,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, conversation_id: currentConversationId })
+          body: JSON.stringify({ message: promptText, conversation_id: currentConversationId })
         });
         const data = await res.json();
 
@@ -4119,8 +4489,11 @@ HTML_PAGE = r"""<!DOCTYPE html>
       renderMemoryCenter(currentMemoriesData, val);
     }
 
-    // Initialize Auth state on page load
-    window.addEventListener('DOMContentLoaded', checkAuth);
+    // Initialize Auth state & Drag and Drop on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      setupDragAndDrop();
+    });
   </script>
 </body>
 </html>
@@ -4374,6 +4747,19 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 "conversation_id": conv_id,
                 "title": conv["title"] if conv else "New Chat"
             })
+            return
+
+        elif parsed.path == "/api/files/upload":
+            filename = data.get("filename") or "document.txt"
+            base64_data = data.get("file_data")
+            raw_text = data.get("raw_text")
+
+            if not base64_data and raw_text is None:
+                self._send_json({"error": "No file content provided"}, status=400)
+                return
+
+            result = parse_uploaded_file(filename, base64_data=base64_data, raw_text=raw_text)
+            self._send_json(result)
             return
 
         elif parsed.path == "/api/conversations/delete":
