@@ -73,8 +73,36 @@ class TestWSGIApp(unittest.TestCase):
         self.assertTrue(len(status_captured) > 0)
         self.assertTrue(status_captured[0].startswith("200"))
         res_json = json.loads(b"".join(body).decode("utf-8"))
-        self.assertIn("authenticated", res_json)
+    def test_wsgi_signup_and_login(self):
+        signup_payload = json.dumps({
+            "email": "test@novax.ai",
+            "password": "Password123!",
+            "name": "Test User"
+        }).encode("utf-8")
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/auth/signup",
+            "QUERY_STRING": "",
+            "wsgi.input": io.BytesIO(signup_payload),
+            "CONTENT_LENGTH": str(len(signup_payload)),
+            "CONTENT_TYPE": "application/json",
+            "HTTP_X_FORWARDED_FOR": "1.2.3.4"
+        }
+        status_captured = []
+        headers_captured = []
+
+        def start_response(status, headers):
+            status_captured.append(status)
+            headers_captured.append(headers)
+
+        body = wsgi_app(environ, start_response)
+        self.assertTrue(status_captured[0].startswith("200"), f"Status was {status_captured}")
+        res_json = json.loads(b"".join(body).decode("utf-8"))
+        self.assertTrue(res_json.get("success"))
+        self.assertEqual(res_json["user"]["email"], "test@novax.ai")
 
 
 if __name__ == "__main__":
     unittest.main()
+

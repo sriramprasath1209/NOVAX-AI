@@ -4722,14 +4722,9 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
 
     def _get_request_path(self):
         raw_path = self.path or "/"
-        for h in ["x-matched-path", "x-forwarded-uri", "x-invoke-path", "x-url"]:
-            val = self.headers.get(h)
-            if val:
-                raw_path = val
-                break
-
         parsed = urlparse(raw_path)
         path = parsed.path or "/"
+
         if path.startswith("/api/index.py"):
             path = path[len("/api/index.py"):] or "/"
         elif path.startswith("/api/index"):
