@@ -4736,9 +4736,19 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
         return path, parsed
 
     def do_GET(self):
+        if "debug_probe" in (self.path or ""):
+            path, parsed = self._get_request_path()
+            self._send_json({
+                "raw_path": self.path,
+                "resolved_path": path,
+                "headers": dict(self.headers)
+            })
+            return
+
         path, parsed = self._get_request_path()
 
         if path in ["/", "", "/index.html"]:
+
             self._send_html(HTML_PAGE)
             return
 
