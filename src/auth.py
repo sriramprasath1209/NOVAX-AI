@@ -65,11 +65,28 @@ def login_user(email: str, password: str) -> tuple[dict | None, str | None]:
         return None, "Invalid credentials. If you previously used Google Sign-In, please sign in with Google."
 
     if not verify_password(password, user["password_hash"], user["salt"]):
-        return None, "Incorrect password. Please try again."
+        return None, "Incorrect password. Please try again or click 'Forgot password?' to reset."
 
     return user, None
 
+def reset_password(email: str, new_password: str) -> tuple[dict | None, str | None]:
+    email = email.lower().strip()
+    if not email or "@" not in email:
+        return None, "Please enter a valid email address."
+    if not new_password or len(new_password) < 6:
+        return None, "Password must be at least 6 characters."
+
+    user = db.get_user_by_email(email)
+    if not user:
+        return None, "Account not found with this email. Please click 'Create account' to register."
+
+    pwd_hash, salt = hash_password(new_password)
+    db.update_user_password(email, pwd_hash, salt)
+    updated_user = db.get_user_by_email(email)
+    return updated_user, None
+
 def create_session(user_id: str) -> str:
+
     session_id = secrets.token_hex(32)
     expires_at = time.time() + SESSION_DURATION
     db.create_session(session_id, user_id, expires_at)

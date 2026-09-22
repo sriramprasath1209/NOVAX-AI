@@ -251,7 +251,19 @@ class Database:
             row = cursor.fetchone()
             return dict(row) if row else None
 
+    def update_user_password(self, email, password_hash, salt):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE users 
+                SET password_hash = ?, salt = ? 
+                WHERE LOWER(email) = ?
+            """, (password_hash, salt, email.lower().strip()))
+            conn.commit()
+            return cursor.rowcount > 0
+
     # --- Session queries ---
+
     def create_session(self, session_id, user_id, expires_at):
         with self.get_connection() as conn:
             cursor = conn.cursor()

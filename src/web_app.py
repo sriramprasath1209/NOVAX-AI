@@ -2119,7 +2119,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
           <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <label for="login-password">Password</label>
-              <a href="#" onclick="alert('Password recovery is handled via your identity provider.')" style="font-size:12px; color:var(--novax-cyan); text-decoration:none;">Forgot password?</a>
+              <a href="#" onclick="showView('reset-view')" style="font-size:12px; color:var(--novax-cyan); text-decoration:none;">Forgot password?</a>
             </div>
             <input type="password" id="login-password" class="form-control" placeholder="••••••••" required />
           </div>
@@ -2187,6 +2187,54 @@ HTML_PAGE = r"""<!DOCTYPE html>
       </div>
     </div>
   </div>
+
+  <!-- RESET PASSWORD VIEW -->
+  <div id="reset-view" class="view-container">
+    <div class="auth-wrapper">
+      <div class="auth-brand">
+        <div class="auth-logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h1 class="auth-title">NOVAX</h1>
+        <div class="auth-subtitle">AI PERSONAL AGENT</div>
+      </div>
+
+      <div class="auth-card">
+        <h2>Reset your password</h2>
+        <p class="card-desc">Enter your email and choose a new password.</p>
+
+        <div id="reset-error" class="error-banner"></div>
+
+        <form class="auth-form" onsubmit="handleResetPassword(event)">
+          <div class="form-group">
+            <label for="reset-email">Email address</label>
+            <input type="email" id="reset-email" class="form-control" placeholder="name@example.com" required />
+          </div>
+
+          <div class="form-group">
+            <label for="reset-password">New Password</label>
+            <input type="password" id="reset-password" class="form-control" placeholder="At least 6 characters" required />
+          </div>
+
+          <div class="form-group">
+            <label for="reset-confirm-password">Confirm New Password</label>
+            <input type="password" id="reset-confirm-password" class="form-control" placeholder="Confirm new password" required />
+          </div>
+
+          <button type="submit" id="btn-submit-reset" class="btn-primary">
+            <span>Update Password & Sign In</span>
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Remember your password? <a href="#" onclick="showView('login-view')">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- AUTHENTICATED APP DASHBOARD -->
   <div id="app-view" class="view-container">
@@ -3736,7 +3784,52 @@ HTML_PAGE = r"""<!DOCTYPE html>
       }
     }
 
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      hideError('reset-error');
+      const email = document.getElementById('reset-email').value;
+      const password = document.getElementById('reset-password').value;
+      const confirmPassword = document.getElementById('reset-confirm-password').value;
+      const btn = document.getElementById('btn-submit-reset');
+
+      if (password !== confirmPassword) {
+        showError('reset-error', 'Passwords do not match.');
+        return;
+      }
+      if (password.length < 6) {
+        showError('reset-error', 'Password must be at least 6 characters.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Updating password...';
+
+      try {
+        const res = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          currentUser = data.user;
+          updateUserProfileUI();
+          showView('app-view');
+          startNewChat();
+        } else {
+          showError('reset-error', data.error || 'Unable to reset password.');
+        }
+      } catch (err) {
+        showError('reset-error', 'Unable to reset password. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Update Password & Sign In';
+      }
+    }
+
     async function handleLogout() {
+
       try {
         await fetch('/api/auth/logout', { method: 'POST' });
       } catch (e) {}
@@ -4900,7 +4993,27 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(res_body)
             return
 
+        elif path == "/api/auth/reset-password":
+            email = data.get("email")
+            password = data.get("password")
+
+            user, err = auth.reset_password(email, password)
+            if err:
+                self._send_json({"error": err}, status=400)
+                return
+
+            session_id = auth.create_session(user["id"])
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Set-Cookie", f"session_id={session_id}; Path=/; HttpOnly; SameSite=Lax")
+            res_body = json.dumps({"success": True, "user": {"id": user["id"], "email": user["email"], "name": user["name"]}}).encode("utf-8")
+            self.send_header("Content-Length", str(len(res_body)))
+            self.end_headers()
+            self.wfile.write(res_body)
+            return
+
         elif path == "/api/auth/logout":
+
             user = self._get_authenticated_user()
             if user:
                 auth.logout_session(user["session_id"])

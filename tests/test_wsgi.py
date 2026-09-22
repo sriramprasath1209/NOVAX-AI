@@ -102,7 +102,39 @@ class TestWSGIApp(unittest.TestCase):
         self.assertTrue(res_json.get("success"))
         self.assertEqual(res_json["user"]["email"], "test@novax.ai")
 
+    def test_wsgi_reset_password(self):
+        # 1. Signup
+        signup_payload = json.dumps({"email": "reset@novax.ai", "password": "OldPassword1!", "name": "Reset User"}).encode("utf-8")
+        environ_signup = {
+            "REQUEST_METHOD": "POST", "PATH_INFO": "/api/auth/signup", "QUERY_STRING": "",
+            "wsgi.input": io.BytesIO(signup_payload), "CONTENT_LENGTH": str(len(signup_payload)), "CONTENT_TYPE": "application/json"
+        }
+        wsgi_app(environ_signup, lambda s, h: None)
+
+        # 2. Reset Password
+        reset_payload = json.dumps({"email": "reset@novax.ai", "password": "NewPassword2!"}).encode("utf-8")
+        environ_reset = {
+            "REQUEST_METHOD": "POST", "PATH_INFO": "/api/auth/reset-password", "QUERY_STRING": "",
+            "wsgi.input": io.BytesIO(reset_payload), "CONTENT_LENGTH": str(len(reset_payload)), "CONTENT_TYPE": "application/json"
+        }
+        status_captured = []
+        body = wsgi_app(environ_reset, lambda s, h: status_captured.append(s))
+        self.assertTrue(status_captured[0].startswith("200"))
+        res_json = json.loads(b"".join(body).decode("utf-8"))
+        self.assertTrue(res_json.get("success"))
+
+        # 3. Login with new password
+        login_payload = json.dumps({"email": "reset@novax.ai", "password": "NewPassword2!"}).encode("utf-8")
+        environ_login = {
+            "REQUEST_METHOD": "POST", "PATH_INFO": "/api/auth/login", "QUERY_STRING": "",
+            "wsgi.input": io.BytesIO(login_payload), "CONTENT_LENGTH": str(len(login_payload)), "CONTENT_TYPE": "application/json"
+        }
+        status_login = []
+        body_login = wsgi_app(environ_login, lambda s, h: status_login.append(s))
+        self.assertTrue(status_login[0].startswith("200"))
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
