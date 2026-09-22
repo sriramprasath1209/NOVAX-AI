@@ -1238,11 +1238,139 @@ HTML_PAGE = r"""<!DOCTYPE html>
     .memory-field-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      background: rgba(17, 24, 39, 0.4);
-      padding: 10px 14px;
+      gap: 6px;
+      background: rgba(17, 24, 39, 0.45);
+      padding: 12px 14px;
       border-radius: 12px;
       border: 1px solid var(--novax-border-light);
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .memory-field-item.editable {
+      cursor: pointer;
+    }
+
+    .memory-field-item.editable:hover {
+      border-color: rgba(99, 102, 241, 0.5);
+      background: rgba(30, 41, 59, 0.65);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), 0 0 12px rgba(99, 102, 241, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .memory-field-item.is-editing {
+      cursor: default;
+      border-color: var(--novax-primary);
+      background: rgba(15, 23, 42, 0.9);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+      transform: none;
+    }
+
+    .mem-edit-hint {
+      font-size: 10px;
+      color: var(--novax-cyan);
+      font-weight: 600;
+      opacity: 0;
+      transform: translateX(4px);
+      transition: all 0.2s ease;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .memory-field-item.editable:hover .mem-edit-hint {
+      opacity: 0.85;
+      transform: translateX(0);
+    }
+
+    .memory-field-empty {
+      color: var(--novax-muted);
+      font-style: italic;
+      opacity: 0.7;
+      font-weight: 400;
+    }
+
+    .memory-inline-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+      width: 100%;
+    }
+
+    .memory-inline-input {
+      width: 100%;
+      background: rgba(10, 15, 29, 0.95);
+      border: 1px solid var(--novax-primary);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13.5px;
+      padding: 7px 10px;
+      font-family: inherit;
+      outline: none;
+      box-shadow: 0 0 8px rgba(99, 102, 241, 0.25);
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    .memory-inline-input:focus {
+      border-color: var(--novax-cyan);
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+    }
+
+    .memory-inline-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .btn-inline-save {
+      background: linear-gradient(135deg, var(--novax-primary), #4F46E5);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-inline-save:hover {
+      filter: brightness(1.15);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-inline-cancel {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--novax-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-inline-cancel:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-mem-del {
+      background: transparent;
+      border: none;
+      color: var(--novax-muted);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-mem-del:hover {
+      color: #F87171;
+      background: rgba(239, 68, 68, 0.15);
     }
 
     .memory-field-label {
@@ -3961,7 +4089,13 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
       Object.keys(memories).forEach(cat => {
         if (memories[cat]) {
-          totalItems += Object.keys(memories[cat]).length;
+          Object.keys(memories[cat]).forEach(k => {
+            const v = memories[cat][k];
+            const actualVal = (v && typeof v === 'object' && v.value !== undefined) ? v.value : v;
+            if (actualVal !== undefined && actualVal !== null && String(actualVal).trim() !== '') {
+              totalItems++;
+            }
+          });
         }
       });
       document.getElementById('total-memory-count').innerText = totalItems;
@@ -3970,7 +4104,11 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
       categories.forEach(catConfig => {
         const catData = memories[catConfig.id] || memories[catConfig.id.toLowerCase()] || {};
-        const itemsCount = Object.keys(catData).length;
+        const itemsCount = Object.keys(catData).filter(k => {
+          const v = catData[k];
+          const actualVal = (v && typeof v === 'object' && v.value !== undefined) ? v.value : v;
+          return actualVal !== undefined && actualVal !== null && String(actualVal).trim() !== '';
+        }).length;
 
         if (q) {
           const catText = (catConfig.title + ' ' + JSON.stringify(catData)).toLowerCase();
@@ -4011,6 +4149,145 @@ HTML_PAGE = r"""<!DOCTYPE html>
       return data[key].value || data[key] || defaultVal;
     }
 
+    function renderEditableField(category, key, label, value, type = 'text', placeholder = 'Not specified') {
+      const displayVal = value ? escapeHtml(value) : `<span class="memory-field-empty">${placeholder}</span>`;
+      return `
+        <div class="memory-field-item editable"
+             id="mem-field-${category}-${key}"
+             onclick="startInlineEdit('${category}', '${key}', '${label.replace(/'/g, "\\'")}', this, '${type}')"
+             title="Click to edit ${label}">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="memory-field-label">${label}</span>
+            <span class="mem-edit-hint">✎ Edit</span>
+          </div>
+          <span class="memory-field-val">${displayVal}</span>
+        </div>
+      `;
+    }
+
+    function startInlineEdit(category, key, label, itemEl, type = 'text') {
+      if (itemEl.classList.contains('is-editing')) return;
+      itemEl.classList.add('is-editing');
+
+      const catData = currentMemoriesData[category] || {};
+      const currentVal = getVal(catData, key, '');
+      const isMultiLine = type === 'textarea' || type === 'multiline';
+
+      const inputHtml = isMultiLine
+        ? `<textarea class="memory-inline-input" id="inline-input-${category}-${key}" rows="2" placeholder="Enter ${label}...">${escapeHtml(currentVal)}</textarea>`
+        : `<input type="text" class="memory-inline-input" id="inline-input-${category}-${key}" value="${escapeHtml(currentVal)}" placeholder="Enter ${label}..." />`;
+
+      itemEl.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span class="memory-field-label">${label}</span>
+          <span style="font-size:10px; color:var(--novax-cyan); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Editing...</span>
+        </div>
+        <div class="memory-inline-form" onclick="event.stopPropagation();">
+          ${inputHtml}
+          <div class="memory-inline-actions">
+            <button type="button" class="btn-inline-save" onclick="saveInlineEdit('${category}', '${key}', this); event.stopPropagation();">Save</button>
+            <button type="button" class="btn-inline-cancel" onclick="cancelInlineEdit('${category}', '${key}', this); event.stopPropagation();">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      const inputEl = document.getElementById(`inline-input-${category}-${key}`);
+      if (inputEl) {
+        inputEl.focus();
+        inputEl.select();
+
+        inputEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !isMultiLine) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveInlineEdit(category, key, inputEl);
+          } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && isMultiLine) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveInlineEdit(category, key, inputEl);
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            cancelInlineEdit(category, key, inputEl);
+          }
+        });
+      }
+    }
+
+    function startCustomInlineEdit(category, key, itemEl) {
+      if (itemEl.classList.contains('is-editing')) return;
+      itemEl.classList.add('is-editing');
+
+      const catData = currentMemoriesData[category] || {};
+      const currentVal = getVal(catData, key, '');
+      const safeKeyAttr = key.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+      itemEl.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span class="memory-field-label">${escapeHtml(key)}</span>
+          <span style="font-size:10px; color:var(--novax-cyan); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Editing...</span>
+        </div>
+        <div class="memory-inline-form" onclick="event.stopPropagation();">
+          <textarea class="memory-inline-input" id="inline-input-${category}-${safeKeyAttr}" rows="2" placeholder="Enter value...">${escapeHtml(currentVal)}</textarea>
+          <div class="memory-inline-actions">
+            <button type="button" class="btn-inline-save" onclick="saveCustomInlineEdit('${category}', '${escapeHtml(key).replace(/'/g, "\\'")}', '${safeKeyAttr}', this); event.stopPropagation();">Save</button>
+            <button type="button" class="btn-inline-cancel" onclick="cancelInlineEdit('${category}', '${escapeHtml(key).replace(/'/g, "\\'")}', this); event.stopPropagation();">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      const inputEl = document.getElementById(`inline-input-${category}-${safeKeyAttr}`);
+      if (inputEl) {
+        inputEl.focus();
+        inputEl.select();
+
+        inputEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveCustomInlineEdit(category, key, safeKeyAttr, inputEl);
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            cancelInlineEdit(category, key, inputEl);
+          }
+        });
+      }
+    }
+
+    async function saveInlineEdit(category, key, elementInsideItem) {
+      const inputEl = document.getElementById(`inline-input-${category}-${key}`);
+      if (!inputEl) return;
+      const newVal = inputEl.value.trim();
+
+      await saveMemoryItem(category, key, newVal);
+
+      if (category === 'profile' && key === 'name') {
+        if (typeof currentUser !== 'undefined' && currentUser) {
+          currentUser.name = newVal || 'User';
+        }
+        const displayNameEl = document.getElementById('user-display-name');
+        if (displayNameEl) displayNameEl.innerText = newVal || 'User';
+        const avatarEl = document.getElementById('user-avatar');
+        if (avatarEl) avatarEl.innerText = (newVal || 'U').charAt(0).toUpperCase();
+      }
+
+      await loadMemories();
+    }
+
+    async function saveCustomInlineEdit(category, key, safeKeyAttr, elementInsideItem) {
+      const inputEl = document.getElementById(`inline-input-${category}-${safeKeyAttr}`);
+      if (!inputEl) return;
+      const newVal = inputEl.value.trim();
+
+      await saveMemoryItem(category, key, newVal);
+      await loadMemories();
+    }
+
+    function cancelInlineEdit(category, key, elementInsideItem) {
+      renderMemoryCenter(currentMemoriesData);
+    }
+
     function renderProfileCategoryHtml(data) {
       const name = getVal(data, 'name');
       const prefName = getVal(data, 'preferred_name');
@@ -4021,43 +4298,18 @@ HTML_PAGE = r"""<!DOCTYPE html>
       const timezone = getVal(data, 'timezone');
       const language = getVal(data, 'language');
 
-      if (!name && !country && !timezone && !language) {
-        return `
-          <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">NOVAX doesn't know about your profile details yet.</p>
-          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="promptEditProfile()">+ Add Profile Info</button>
-        `;
-      }
-
       return `
         <div class="memory-field-grid">
-          <div class="memory-field-item"><span class="memory-field-label">Full Name</span><span class="memory-field-val">${escapeHtml(name || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Preferred Name</span><span class="memory-field-val">${escapeHtml(prefName || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Pronouns</span><span class="memory-field-val">${escapeHtml(pronouns || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Age Range</span><span class="memory-field-val">${escapeHtml(ageRange || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Country</span><span class="memory-field-val">${escapeHtml(country || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">City</span><span class="memory-field-val">${escapeHtml(city || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Timezone</span><span class="memory-field-val">${escapeHtml(timezone || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Preferred Language</span><span class="memory-field-val">${escapeHtml(language || 'Not specified')}</span></div>
-        </div>
-        <div style="margin-top:14px;">
-          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditProfile()">Edit Profile</button>
+          ${renderEditableField('profile', 'name', 'Full Name', name)}
+          ${renderEditableField('profile', 'preferred_name', 'Preferred Name', prefName)}
+          ${renderEditableField('profile', 'pronouns', 'Pronouns', pronouns)}
+          ${renderEditableField('profile', 'age_range', 'Age Range', ageRange)}
+          ${renderEditableField('profile', 'country', 'Country', country)}
+          ${renderEditableField('profile', 'city', 'City', city)}
+          ${renderEditableField('profile', 'timezone', 'Timezone', timezone)}
+          ${renderEditableField('profile', 'language', 'Preferred Language', language)}
         </div>
       `;
-    }
-
-    async function promptEditProfile() {
-      const data = currentMemoriesData['profile'] || {};
-      const name = prompt('Full Name:', getVal(data, 'name'));
-      if (name !== null) await saveMemoryItem('profile', 'name', name.trim());
-      const prefName = prompt('Preferred Name:', getVal(data, 'preferred_name'));
-      if (prefName !== null) await saveMemoryItem('profile', 'preferred_name', prefName.trim());
-      const country = prompt('Country:', getVal(data, 'country'));
-      if (country !== null) await saveMemoryItem('profile', 'country', country.trim());
-      const timezone = prompt('Timezone (e.g. Asia/Kolkata):', getVal(data, 'timezone'));
-      if (timezone !== null) await saveMemoryItem('profile', 'timezone', timezone.trim());
-      const language = prompt('Preferred Language:', getVal(data, 'language'));
-      if (language !== null) await saveMemoryItem('profile', 'language', language.trim());
-      loadMemories();
     }
 
     function renderEducationCategoryHtml(data) {
@@ -4070,52 +4322,29 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
       const subjects = subjectsStr ? subjectsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-      if (!status && !institution && !course) {
-        return `
-          <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">NOVAX doesn't know about your education yet.</p>
-          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="promptEditEducation()">+ Add Education</button>
-        `;
-      }
-
       let chipHtml = subjects.map(s => `
         <span class="mem-chip">
           ${escapeHtml(s)}
-          <button class="mem-chip-del" onclick="removeSubjectChip('${escapeHtml(s).replace(/'/g, "\\'")}')">✕</button>
+          <button class="mem-chip-del" onclick="removeSubjectChip('${escapeHtml(s).replace(/'/g, "\\'")}')" title="Remove subject">✕</button>
         </span>
       `).join('');
 
       return `
-        <div class="memory-field-grid" style="margin-bottom:12px;">
-          <div class="memory-field-item"><span class="memory-field-label">Status</span><span class="memory-field-val">${escapeHtml(status || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Institution</span><span class="memory-field-val">${escapeHtml(institution || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Degree / Course</span><span class="memory-field-val">${escapeHtml(course || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Field of Study</span><span class="memory-field-val">${escapeHtml(field || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Current Year</span><span class="memory-field-val">${escapeHtml(year || 'Not specified')}</span></div>
+        <div class="memory-field-grid" style="margin-bottom:14px;">
+          ${renderEditableField('education', 'status', 'Status', status)}
+          ${renderEditableField('education', 'institution', 'Institution', institution)}
+          ${renderEditableField('education', 'course', 'Degree / Course', course)}
+          ${renderEditableField('education', 'field', 'Field of Study', field)}
+          ${renderEditableField('education', 'year', 'Current Year', year)}
         </div>
-        <div style="margin-bottom:12px;">
-          <span class="memory-field-label">Subjects</span>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span class="memory-field-label">Subjects</span>
+            <button class="btn-logout" style="color:var(--novax-primary); padding:4px 12px; font-size:12px;" onclick="addSubjectPrompt()">+ Add Subject</button>
+          </div>
           <div class="chip-container">${chipHtml || '<span style="font-size:13px; color:var(--novax-muted);">No subjects added yet.</span>'}</div>
         </div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditEducation()">Edit Education</button>
-          <button class="btn-logout" style="color:var(--novax-primary); padding:6px 14px; font-size:13px;" onclick="addSubjectPrompt()">+ Add Subject</button>
-        </div>
       `;
-    }
-
-    async function promptEditEducation() {
-      const data = currentMemoriesData['education'] || {};
-      const status = prompt('Education Status (e.g. Student, Graduate):', getVal(data, 'status'));
-      if (status !== null) await saveMemoryItem('education', 'status', status.trim());
-      const institution = prompt('Institution / University:', getVal(data, 'institution'));
-      if (institution !== null) await saveMemoryItem('education', 'institution', institution.trim());
-      const course = prompt('Degree / Course (e.g. B.Tech):', getVal(data, 'course'));
-      if (course !== null) await saveMemoryItem('education', 'course', course.trim());
-      const field = prompt('Field of Study (e.g. Computer Science):', getVal(data, 'field'));
-      if (field !== null) await saveMemoryItem('education', 'field', field.trim());
-      const year = prompt('Current Year (e.g. 2nd Year):', getVal(data, 'year'));
-      if (year !== null) await saveMemoryItem('education', 'year', year.trim());
-      loadMemories();
     }
 
     async function addSubjectPrompt() {
@@ -4151,39 +4380,25 @@ HTML_PAGE = r"""<!DOCTYPE html>
       let chipsHtml = techSkills.map(s => `
         <span class="mem-chip">
           ${escapeHtml(s)}
-          <button class="mem-chip-del" onclick="removeTechSkillChip('${escapeHtml(s).replace(/'/g, "\\'")}')">✕</button>
+          <button class="mem-chip-del" onclick="removeTechSkillChip('${escapeHtml(s).replace(/'/g, "\\'")}')" title="Remove skill">✕</button>
         </span>
       `).join('');
 
       return `
-        <div class="memory-field-grid" style="margin-bottom:12px;">
-          <div class="memory-field-item"><span class="memory-field-label">Occupation</span><span class="memory-field-val">${escapeHtml(occupation || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Experience Level</span><span class="memory-field-val">${escapeHtml(experience || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Target Role</span><span class="memory-field-val">${escapeHtml(targetRole || 'Not specified')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Career Goal</span><span class="memory-field-val">${escapeHtml(careerGoal || 'Not specified')}</span></div>
+        <div class="memory-field-grid" style="margin-bottom:14px;">
+          ${renderEditableField('career', 'occupation', 'Occupation', occupation)}
+          ${renderEditableField('career', 'experience', 'Experience Level', experience)}
+          ${renderEditableField('career', 'target_role', 'Target Role', targetRole)}
+          ${renderEditableField('career', 'career_goal', 'Career Goal', careerGoal, 'textarea')}
         </div>
-        <div style="margin-bottom:12px;">
-          <span class="memory-field-label">Technical & Soft Skills</span>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span class="memory-field-label">Technical & Soft Skills</span>
+            <button class="btn-logout" style="color:var(--novax-primary); padding:4px 12px; font-size:12px;" onclick="addSkillPrompt()">+ Add Skill</button>
+          </div>
           <div class="chip-container">${chipsHtml || '<span style="font-size:13px; color:var(--novax-muted);">No skills added yet.</span>'}</div>
         </div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditCareer()">Edit Career Info</button>
-          <button class="btn-logout" style="color:var(--novax-primary); padding:6px 14px; font-size:13px;" onclick="addSkillPrompt()">+ Add Skill</button>
-        </div>
       `;
-    }
-
-    async function promptEditCareer() {
-      const data = currentMemoriesData['career'] || {};
-      const occ = prompt('Occupation:', getVal(data, 'occupation'));
-      if (occ !== null) await saveMemoryItem('career', 'occupation', occ.trim());
-      const exp = prompt('Experience Level (e.g. Beginner, Intermediate, Senior):', getVal(data, 'experience'));
-      if (exp !== null) await saveMemoryItem('career', 'experience', exp.trim());
-      const role = prompt('Target Role (e.g. AI Engineer):', getVal(data, 'target_role'));
-      if (role !== null) await saveMemoryItem('career', 'target_role', role.trim());
-      const goal = prompt('Career Goal:', getVal(data, 'career_goal'));
-      if (goal !== null) await saveMemoryItem('career', 'career_goal', goal.trim());
-      loadMemories();
     }
 
     async function addSkillPrompt() {
@@ -4214,17 +4429,17 @@ HTML_PAGE = r"""<!DOCTYPE html>
       let chipsHtml = interests.map(s => `
         <span class="mem-chip">
           ${escapeHtml(s)}
-          <button class="mem-chip-del" onclick="removeInterestChip('${escapeHtml(s).replace(/'/g, "\\'")}')">✕</button>
+          <button class="mem-chip-del" onclick="removeInterestChip('${escapeHtml(s).replace(/'/g, "\\'")}')" title="Remove interest">✕</button>
         </span>
       `).join('');
 
       return `
-        <div style="margin-bottom:12px;">
-          <span class="memory-field-label">Hobbies, Topics & Technologies</span>
-          <div class="chip-container">${chipsHtml || '<span style="font-size:13px; color:var(--novax-muted);">No interests added yet.</span>'}</div>
-        </div>
         <div>
-          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="addInterestPrompt()">+ Add Interest</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span class="memory-field-label">Hobbies, Topics & Technologies</span>
+            <button class="btn-logout" style="color:var(--novax-cyan); padding:4px 12px; font-size:12px;" onclick="addInterestPrompt()">+ Add Interest</button>
+          </div>
+          <div class="chip-container">${chipsHtml || '<span style="font-size:13px; color:var(--novax-muted);">No interests added yet.</span>'}</div>
         </div>
       `;
     }
@@ -4255,29 +4470,11 @@ HTML_PAGE = r"""<!DOCTYPE html>
       const longTerm = getVal(data, 'long_term');
 
       return `
-        <div class="memory-field-grid" style="margin-bottom:12px;">
-          <div class="memory-field-item">
-            <span class="memory-field-label">Short-Term Goals</span>
-            <span class="memory-field-val">${escapeHtml(shortTerm || 'Not specified')}</span>
-          </div>
-          <div class="memory-field-item">
-            <span class="memory-field-label">Long-Term Goals</span>
-            <span class="memory-field-val">${escapeHtml(longTerm || 'Not specified')}</span>
-          </div>
-        </div>
-        <div>
-          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditGoals()">Edit Goals</button>
+        <div class="memory-field-grid">
+          ${renderEditableField('goals', 'short_term', 'Short-Term Goals', shortTerm, 'textarea')}
+          ${renderEditableField('goals', 'long_term', 'Long-Term Goals', longTerm, 'textarea')}
         </div>
       `;
-    }
-
-    async function promptEditGoals() {
-      const data = currentMemoriesData['goals'] || {};
-      const st = prompt('Short-Term Goals:', getVal(data, 'short_term'));
-      if (st !== null) await saveMemoryItem('goals', 'short_term', st.trim());
-      const lt = prompt('Long-Term Goals:', getVal(data, 'long_term'));
-      if (lt !== null) await saveMemoryItem('goals', 'long_term', lt.trim());
-      loadMemories();
     }
 
     function renderPreferencesCategoryHtml(data) {
@@ -4293,7 +4490,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
             <span class="memory-field-label">Response Length</span>
             <div class="pref-option-group">
               ${['Concise', 'Balanced', 'Detailed'].map(opt => `
-                <div class="pref-radio-label ${length === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'length', '${opt}')">
+                <div class="pref-radio-label ${length === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'length', '${opt}'); loadMemories();">
                   ${length === opt ? '●' : '○'} ${opt}
                 </div>
               `).join('')}
@@ -4303,7 +4500,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
             <span class="memory-field-label">Explanation Style</span>
             <div class="pref-option-group">
               ${['Simple', 'Step-by-step', 'Technical'].map(opt => `
-                <div class="pref-radio-label ${style === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'style', '${opt}')">
+                <div class="pref-radio-label ${style === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'style', '${opt}'); loadMemories();">
                   ${style === opt ? '●' : '○'} ${opt}
                 </div>
               `).join('')}
@@ -4313,36 +4510,18 @@ HTML_PAGE = r"""<!DOCTYPE html>
             <span class="memory-field-label">Tone</span>
             <div class="pref-option-group">
               ${['Professional', 'Friendly', 'Casual'].map(opt => `
-                <div class="pref-radio-label ${tone === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'tone', '${opt}')">
+                <div class="pref-radio-label ${tone === opt ? 'selected' : ''}" onclick="saveMemoryItem('preferences', 'tone', '${opt}'); loadMemories();">
                   ${tone === opt ? '●' : '○'} ${opt}
                 </div>
               `).join('')}
             </div>
           </div>
           <div class="memory-field-grid">
-            <div class="memory-field-item">
-              <span class="memory-field-label">Preferred Programming Language</span>
-              <span class="memory-field-val">${escapeHtml(lang)}</span>
-            </div>
-            <div class="memory-field-item">
-              <span class="memory-field-label">Additional Instructions</span>
-              <span class="memory-field-val">${escapeHtml(notes || 'None')}</span>
-            </div>
-          </div>
-          <div>
-            <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditPreferences()">Edit Preferences</button>
+            ${renderEditableField('preferences', 'programming_language', 'Preferred Programming Language', lang)}
+            ${renderEditableField('preferences', 'additional_notes', 'Additional Instructions', notes, 'textarea')}
           </div>
         </div>
       `;
-    }
-
-    async function promptEditPreferences() {
-      const data = currentMemoriesData['preferences'] || {};
-      const lang = prompt('Preferred Programming Language:', getVal(data, 'programming_language', 'Python'));
-      if (lang !== null) await saveMemoryItem('preferences', 'programming_language', lang.trim());
-      const notes = prompt('Additional instructions for NOVAX:', getVal(data, 'additional_notes'));
-      if (notes !== null) await saveMemoryItem('preferences', 'additional_notes', notes.trim());
-      loadMemories();
     }
 
     function renderProjectsCategoryHtml(data) {
@@ -4350,7 +4529,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       if (items.length === 0) {
         return `
           <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">No project context stored yet.</p>
-          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="addCustomMemoryCategoryPrompt('projects')">+ Add Project Memory</button>
+          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="addCustomMemoryCategoryPrompt('projects')">+ Add Project Context</button>
         `;
       }
       let html = '<div class="memory-field-grid">';
@@ -4358,21 +4537,25 @@ HTML_PAGE = r"""<!DOCTYPE html>
         const itemObj = data[k];
         const val = itemObj.value || itemObj;
         const src = itemObj.source || 'USER';
+        const safeKey = escapeHtml(k).replace(/'/g, "\\'");
         html += `
-          <div class="memory-field-item">
+          <div class="memory-field-item editable" id="mem-field-projects-${escapeHtml(k)}" onclick="startCustomInlineEdit('projects', '${safeKey}', this)" title="Click to edit ${escapeHtml(k)}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="memory-field-label">${escapeHtml(k)}</span>
-              <span class="source-badge ${src}">${src}</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="memory-field-label">${escapeHtml(k)}</span>
+                <span class="source-badge ${src}">${src}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="mem-edit-hint">✎ Edit</span>
+                <button class="btn-mem-del" onclick="event.stopPropagation(); deleteMemoryConfirm('projects', '${safeKey}')" title="Delete memory">✕</button>
+              </div>
             </div>
             <span class="memory-field-val">${escapeHtml(val)}</span>
-            <div style="margin-top:6px; text-align:right;">
-              <button class="btn-logout" style="font-size:11px; padding:2px 6px; color:#FCA5A5;" onclick="deleteMemoryConfirm('projects', '${escapeHtml(k).replace(/'/g, "\\'")}')">Delete</button>
-            </div>
           </div>
         `;
       });
       html += '</div>';
-      html += `<div style="margin-top:12px;"><button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="addCustomMemoryCategoryPrompt('projects')">+ Add Project Context</button></div>`;
+      html += `<div style="margin-top:14px;"><button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="addCustomMemoryCategoryPrompt('projects')">+ Add Project Context</button></div>`;
       return html;
     }
 
@@ -4382,37 +4565,14 @@ HTML_PAGE = r"""<!DOCTYPE html>
       const sleep = getVal(data, 'sleep');
       const workHours = getVal(data, 'working_hours');
 
-      if (!wakeup && !study && !sleep && !workHours) {
-        return `
-          <p style="color:var(--novax-muted); font-size:14px; margin-bottom:14px;">No routine schedule stored yet.</p>
-          <button class="btn-primary" style="padding:6px 14px; font-size:13px; width:auto;" onclick="promptEditRoutines()">+ Add Routine</button>
-        `;
-      }
-
       return `
-        <div class="memory-field-grid" style="margin-bottom:12px;">
-          <div class="memory-field-item"><span class="memory-field-label">Wake-Up Time</span><span class="memory-field-val">${escapeHtml(wakeup || 'Not set')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Study Time</span><span class="memory-field-val">${escapeHtml(study || 'Not set')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Sleep Time</span><span class="memory-field-val">${escapeHtml(sleep || 'Not set')}</span></div>
-          <div class="memory-field-item"><span class="memory-field-label">Preferred Working Hours</span><span class="memory-field-val">${escapeHtml(workHours || 'Not set')}</span></div>
-        </div>
-        <div>
-          <button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="promptEditRoutines()">Edit Routines</button>
+        <div class="memory-field-grid">
+          ${renderEditableField('routines', 'wake_up', 'Wake-Up Time', wakeup, 'text', 'Not set')}
+          ${renderEditableField('routines', 'study', 'Study Time', study, 'text', 'Not set')}
+          ${renderEditableField('routines', 'sleep', 'Sleep Time', sleep, 'text', 'Not set')}
+          ${renderEditableField('routines', 'working_hours', 'Preferred Working Hours', workHours, 'text', 'Not set')}
         </div>
       `;
-    }
-
-    async function promptEditRoutines() {
-      const data = currentMemoriesData['routines'] || {};
-      const wu = prompt('Wake-up time (e.g. 7:00 AM):', getVal(data, 'wake_up'));
-      if (wu !== null) await saveMemoryItem('routines', 'wake_up', wu.trim());
-      const st = prompt('Study time (e.g. 7:00 PM):', getVal(data, 'study'));
-      if (st !== null) await saveMemoryItem('routines', 'study', st.trim());
-      const sl = prompt('Sleep time (e.g. 11:00 PM):', getVal(data, 'sleep'));
-      if (sl !== null) await saveMemoryItem('routines', 'sleep', sl.trim());
-      const wh = prompt('Preferred working hours (e.g. 6 PM - 10 PM):', getVal(data, 'working_hours'));
-      if (wh !== null) await saveMemoryItem('routines', 'working_hours', wh.trim());
-      loadMemories();
     }
 
     function renderCustomCategoryHtml(data) {
@@ -4428,21 +4588,25 @@ HTML_PAGE = r"""<!DOCTYPE html>
         const itemObj = data[k];
         const val = itemObj.value || itemObj;
         const src = itemObj.source || 'USER';
+        const safeKey = escapeHtml(k).replace(/'/g, "\\'");
         html += `
-          <div class="memory-field-item">
+          <div class="memory-field-item editable" id="mem-field-custom-${escapeHtml(k)}" onclick="startCustomInlineEdit('custom', '${safeKey}', this)" title="Click to edit ${escapeHtml(k)}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="memory-field-label">${escapeHtml(k)}</span>
-              <span class="source-badge ${src}">${src}</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="memory-field-label">${escapeHtml(k)}</span>
+                <span class="source-badge ${src}">${src}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="mem-edit-hint">✎ Edit</span>
+                <button class="btn-mem-del" onclick="event.stopPropagation(); deleteMemoryConfirm('custom', '${safeKey}')" title="Delete memory">✕</button>
+              </div>
             </div>
             <span class="memory-field-val">${escapeHtml(val)}</span>
-            <div style="margin-top:6px; text-align:right;">
-              <button class="btn-logout" style="font-size:11px; padding:2px 6px; color:#FCA5A5;" onclick="deleteMemoryConfirm('custom', '${escapeHtml(k).replace(/'/g, "\\'")}')">Delete</button>
-            </div>
           </div>
         `;
       });
       html += '</div>';
-      html += `<div style="margin-top:12px;"><button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="addCustomMemoryCategoryPrompt('custom')">+ Add Memory</button></div>`;
+      html += `<div style="margin-top:14px;"><button class="btn-logout" style="color:var(--novax-cyan); padding:6px 14px; font-size:13px;" onclick="addCustomMemoryCategoryPrompt('custom')">+ Add Memory</button></div>`;
       return html;
     }
 
@@ -4805,6 +4969,11 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 self.server.brain.memory.delete(category, key, user_id=user["id"])
             else:
                 self.server.brain.memory.set(category, key, value, user_id=user["id"], source=source)
+                if category == "profile" and key == "name" and value:
+                    try:
+                        db.update_user(user["id"], name=value)
+                    except Exception:
+                        pass
 
             updated = self.server.brain.memory.load_memory(user_id=user["id"])
             self._send_json({"success": True, "memory": updated})
