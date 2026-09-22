@@ -5,14 +5,31 @@ import json
 from pathlib import Path
 from contextlib import contextmanager
 
-_default_db_dir = Path(__file__).resolve().parent.parent / "data"
-if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
-    _default_db_path = Path("/tmp/novax.db")
-else:
-    _default_db_path = _default_db_dir / "novax.db"
+def _resolve_db_path():
+    if os.environ.get("DB_PATH"):
+        return Path(os.environ["DB_PATH"])
+    if os.environ.get("NOVAX_DB_PATH"):
+        return Path(os.environ["NOVAX_DB_PATH"])
 
-DB_PATH = Path(os.environ.get("DB_PATH", os.environ.get("NOVAX_DB_PATH", str(_default_db_path))))
-OLD_MEMORY_PATH = _default_db_dir / "memory.json"
+    # Detect Vercel / AWS Lambda / Serverless
+    is_serverless = any(
+        os.environ.get(k) for k in [
+            "VERCEL", "VERCEL_ENV", "VERCEL_REGION", "NOW_REGION",
+            "AWS_LAMBDA_FUNCTION_NAME", "LAMBDA_TASK_ROOT"
+        ]
+    )
+    if is_serverless:
+        return Path("/tmp/novax.db")
+
+    default_dir = Path(__file__).resolve().parent.parent / "data"
+    try:
+        default_dir.mkdir(parents=True, exist_ok=True)
+        return default_dir / "novax.db"
+    except Exception:
+        return Path("/tmp/novax.db")
+
+DB_PATH = _resolve_db_path()
+OLD_MEMORY_PATH = Path(__file__).resolve().parent.parent / "data" / "memory.json"
 
 class MemoryValue(str):
     def __new__(cls, value, source="USER", created_at=0, updated_at=0):
@@ -40,8 +57,11 @@ class MemoryValue(str):
 
 class Database:
     def __init__(self, db_path=None):
-        self.db_path = Path(db_path) if db_path else DB_PATH
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.db_path = Path(db_path) if db_path else _resolve_db_path()
+        try:
+            self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         self.init_db()
 
     @contextmanager

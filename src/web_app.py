@@ -1,5 +1,6 @@
 import json
 import os
+import io
 import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -4719,14 +4720,31 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
 
         return None
 
-    def do_GET(self):
-        parsed = urlparse(self.path)
+    def _get_request_path(self):
+        raw_path = self.path or "/"
+        for h in ["x-matched-path", "x-forwarded-uri", "x-invoke-path", "x-url"]:
+            val = self.headers.get(h)
+            if val:
+                raw_path = val
+                break
 
-        if parsed.path == "/":
+        parsed = urlparse(raw_path)
+        path = parsed.path or "/"
+        if path.startswith("/api/index.py"):
+            path = path[len("/api/index.py"):] or "/"
+        elif path.startswith("/api/index"):
+            path = path[len("/api/index"):] or "/"
+
+        return path, parsed
+
+    def do_GET(self):
+        path, parsed = self._get_request_path()
+
+        if path in ["/", "", "/index.html"]:
             self._send_html(HTML_PAGE)
             return
 
-        elif parsed.path == "/assets/logo.svg":
+        elif path == "/assets/logo.svg":
             asset_path = os.path.join(os.path.dirname(__file__), "assets", "logo.svg")
             if os.path.exists(asset_path):
                 with open(asset_path, "rb") as f:
@@ -4738,7 +4756,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(content)
                 return
 
-        elif parsed.path == "/api/auth/me":
+        elif path == "/api/auth/me":
             user = self._get_authenticated_user()
             if user:
                 self._send_json({"authenticated": True, "user": {"id": user["id"], "email": user["email"], "name": user["name"]}})
@@ -4746,7 +4764,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 self._send_json({"authenticated": False})
             return
 
-        elif parsed.path == "/api/memory":
+        elif path == "/api/memory":
             user = self._get_authenticated_user()
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
@@ -4755,7 +4773,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(memories)
             return
 
-        elif parsed.path == "/api/memory/search":
+        elif path == "/api/memory/search":
             user = self._get_authenticated_user()
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
@@ -4765,7 +4783,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(results)
             return
 
-        elif parsed.path == "/api/conversations":
+        elif path == "/api/conversations":
             user = self._get_authenticated_user()
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
@@ -4774,7 +4792,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(conversations)
             return
 
-        elif parsed.path == "/api/conversations/messages":
+        elif path == "/api/conversations/messages":
             user = self._get_authenticated_user()
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
@@ -4793,7 +4811,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
-        elif parsed.path == "/api/projects":
+        elif path == "/api/projects":
             user = self._get_authenticated_user()
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
@@ -4802,7 +4820,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(projects)
             return
 
-        elif parsed.path == "/api/tasks":
+        elif path == "/api/tasks":
             user = self._get_authenticated_user()
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
@@ -4811,7 +4829,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(tasks)
             return
 
-        elif parsed.path == "/api/settings":
+        elif path == "/api/settings":
             user = self._get_authenticated_user()
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
@@ -4824,7 +4842,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
-        elif parsed.path == "/api/settings/export":
+        elif path == "/api/settings/export":
             user = self._get_authenticated_user()
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
@@ -4833,10 +4851,11 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(data)
             return
 
-        self._send_json({"error": "not found"}, status=404)
+        # Default fallback for any web route
+        self._send_html(HTML_PAGE)
 
     def do_POST(self):
-        parsed = urlparse(self.path)
+        path, parsed = self._get_request_path()
 
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length).decode("utf-8") if length else "{}"
@@ -4848,7 +4867,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             return
 
         # Auth Endpoints (Unprotected)
-        if parsed.path == "/api/auth/signup":
+        if path == "/api/auth/signup":
             email = data.get("email")
             password = data.get("password")
             name = data.get("name")
@@ -4868,7 +4887,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(res_body)
             return
 
-        elif parsed.path == "/api/auth/login":
+        elif path == "/api/auth/login":
             email = data.get("email")
             password = data.get("password")
 
@@ -4887,7 +4906,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(res_body)
             return
 
-        elif parsed.path == "/api/auth/logout":
+        elif path == "/api/auth/logout":
             user = self._get_authenticated_user()
             if user:
                 auth.logout_session(user["session_id"])
@@ -4906,7 +4925,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "Unauthorized"}, status=401)
             return
 
-        if parsed.path == "/api/chat":
+        if path == "/api/chat":
             message = (data.get("message") or "").strip()
             conv_id = data.get("conversation_id")
             if not message:
@@ -4922,7 +4941,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
-        elif parsed.path == "/api/files/upload":
+        elif path == "/api/files/upload":
             filename = data.get("filename") or "document.txt"
             base64_data = data.get("file_data")
             raw_text = data.get("raw_text")
@@ -4935,7 +4954,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json(result)
             return
 
-        elif parsed.path == "/api/conversations/delete":
+        elif path == "/api/conversations/delete":
             conv_id = data.get("id") or data.get("conversation_id")
             if not conv_id:
                 self._send_json({"error": "id is required"}, status=400)
@@ -4944,7 +4963,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True})
             return
 
-        elif parsed.path == "/api/conversations/rename":
+        elif path == "/api/conversations/rename":
             conv_id = data.get("id") or data.get("conversation_id")
             title = (data.get("title") or "").strip()
             if not conv_id or not title:
@@ -4954,7 +4973,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True})
             return
 
-        elif parsed.path == "/api/messages/delete":
+        elif path == "/api/messages/delete":
             msg_id = data.get("id") or data.get("message_id")
             if not msg_id:
                 self._send_json({"error": "id is required"}, status=400)
@@ -4963,7 +4982,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True})
             return
 
-        elif parsed.path == "/api/memory":
+        elif path == "/api/memory":
             category = data.get("category")
             key = data.get("key")
             value = data.get("value")
@@ -4988,7 +5007,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "memory": updated})
             return
 
-        elif parsed.path == "/api/memory/delete":
+        elif path == "/api/memory/delete":
             category = data.get("category")
             key = data.get("key")
             if not category or not key:
@@ -4999,17 +5018,17 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "memory": updated})
             return
 
-        elif parsed.path == "/api/memory/clear_all":
+        elif path == "/api/memory/clear_all":
             self.brain.memory.clear_all(user_id=user["id"])
             self._send_json({"success": True, "memory": {}})
             return
 
-        elif parsed.path == "/api/clear":
+        elif path == "/api/clear":
             self.brain.conversation.clear(user_id=user["id"])
             self._send_json({"success": True})
             return
 
-        elif parsed.path == "/api/projects/create":
+        elif path == "/api/projects/create":
             name = data.get("name")
             if not name:
                 self._send_json({"error": "name is required"}, status=400)
@@ -5021,7 +5040,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "projects": projects})
             return
 
-        elif parsed.path == "/api/projects/update":
+        elif path == "/api/projects/update":
             project_id = data.get("id")
             name = data.get("name")
             if not project_id or not name:
@@ -5033,7 +5052,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "projects": projects})
             return
 
-        elif parsed.path == "/api/projects/delete":
+        elif path == "/api/projects/delete":
             project_id = data.get("id")
             if not project_id:
                 self._send_json({"error": "id is required"}, status=400)
@@ -5043,7 +5062,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "projects": projects})
             return
 
-        elif parsed.path == "/api/tasks/create":
+        elif path == "/api/tasks/create":
             title = (data.get("title") or "").strip()
             if not title:
                 self._send_json({"error": "title is required"}, status=400)
@@ -5055,7 +5074,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "tasks": tasks})
             return
 
-        elif parsed.path == "/api/tasks/toggle":
+        elif path == "/api/tasks/toggle":
             task_id = data.get("id")
             completed = data.get("completed", False)
             if not task_id:
@@ -5066,7 +5085,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "tasks": tasks})
             return
 
-        elif parsed.path == "/api/tasks/update":
+        elif path == "/api/tasks/update":
             task_id = data.get("id")
             title = (data.get("title") or "").strip()
             tag = data.get("tag")
@@ -5078,7 +5097,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "tasks": tasks})
             return
 
-        elif parsed.path == "/api/tasks/delete":
+        elif path == "/api/tasks/delete":
             task_id = data.get("id")
             if not task_id:
                 self._send_json({"error": "id is required"}, status=400)
@@ -5088,22 +5107,29 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "tasks": tasks})
             return
 
-        elif parsed.path == "/api/tasks/clear_completed":
+        elif path == "/api/tasks/clear_completed":
             db.clear_completed_tasks(user["id"])
             tasks = db.get_user_tasks(user["id"])
             self._send_json({"success": True, "tasks": tasks})
             return
 
-        elif parsed.path == "/api/settings/update":
+        elif path == "/api/settings/update":
             response_style = data.get("response_style")
             web_search = data.get("web_search")
             theme = data.get("theme")
             font_size = data.get("font_size")
-            updated = db.update_user_settings(user["id"], response_style=response_style, web_search=web_search, theme=theme, font_size=font_size)
-            self._send_json({"success": True, "settings": updated})
+
+            db.update_user_settings(
+                user["id"],
+                response_style=response_style,
+                web_search=web_search,
+                theme=theme,
+                font_size=font_size
+            )
+            self._send_json({"success": True})
             return
 
-        elif parsed.path == "/api/settings/profile":
+        elif path == "/api/settings/profile":
             name = (data.get("name") or "").strip()
             password = data.get("password")
             if not name and not password:
@@ -5114,7 +5140,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": True, "name": name or user["name"]})
             return
 
-        elif parsed.path == "/api/settings/clear_data":
+        elif path == "/api/settings/clear_data":
             db.clear_user_workspace(user["id"])
             self._send_json({"success": True})
             return
@@ -5138,6 +5164,88 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+
+def wsgi_app(environ, start_response):
+    """Standard WSGI application interface for Vercel, Gunicorn, and serverless runtimes."""
+    path_info = environ.get("PATH_INFO", "/") or "/"
+    query_string = environ.get("QUERY_STRING", "")
+    full_path = f"{path_info}?{query_string}" if query_string else path_info
+    method = environ.get("REQUEST_METHOD", "GET").upper()
+
+    try:
+        content_length = int(environ.get("CONTENT_LENGTH", 0) or 0)
+    except (ValueError, TypeError):
+        content_length = 0
+
+    body_bytes = environ.get("wsgi.input").read(content_length) if content_length > 0 and environ.get("wsgi.input") else b""
+
+    header_dict = {}
+    if "CONTENT_TYPE" in environ and environ["CONTENT_TYPE"]:
+        header_dict["Content-Type"] = environ["CONTENT_TYPE"]
+    if "CONTENT_LENGTH" in environ and environ["CONTENT_LENGTH"]:
+        header_dict["Content-Length"] = str(content_length)
+    if "HTTP_COOKIE" in environ and environ["HTTP_COOKIE"]:
+        header_dict["Cookie"] = environ["HTTP_COOKIE"]
+    if "HTTP_AUTHORIZATION" in environ and environ["HTTP_AUTHORIZATION"]:
+        header_dict["Authorization"] = environ["HTTP_AUTHORIZATION"]
+
+    for k, v in environ.items():
+        if k.startswith("HTTP_") and k not in ["HTTP_COOKIE", "HTTP_AUTHORIZATION"]:
+            hname = "-".join(part.capitalize() for part in k[5:].split("_"))
+            header_dict[hname] = v
+
+    class MockSocket:
+        def __init__(self, r_data):
+            self.rfile = io.BytesIO(r_data)
+            self.wfile = io.BytesIO()
+
+        def makefile(self, mode, *args, **kwargs):
+            if "b" in mode:
+                return self.rfile if "r" in mode else self.wfile
+            return self.rfile if "r" in mode else self.wfile
+
+        def sendall(self, data):
+            self.wfile.write(data)
+
+        def send(self, data):
+            self.wfile.write(data)
+            return len(data)
+
+    req_lines = [f"{method} {full_path} HTTP/1.1"]
+    for hk, hv in header_dict.items():
+        req_lines.append(f"{hk}: {hv}")
+    raw_req = "\r\n".join(req_lines).encode("utf-8") + b"\r\n\r\n" + body_bytes
+
+    sock = MockSocket(raw_req)
+
+    class DummyServer:
+        brain = None
+
+    try:
+        NOVAXRequestHandler(sock, ("127.0.0.1", 8000), DummyServer())
+    except Exception:
+        pass
+
+    out_bytes = sock.wfile.getvalue()
+    if out_bytes:
+        parts = out_bytes.split(b"\r\n\r\n", 1)
+        raw_headers = parts[0].decode("utf-8", errors="replace").split("\r\n")
+        status_line = raw_headers[0] if raw_headers else "HTTP/1.1 200 OK"
+        status_code = status_line.split(" ", 1)[1] if " " in status_line else "200 OK"
+
+        resp_headers = []
+        for h in raw_headers[1:]:
+            if ":" in h:
+                hk, hv = h.split(":", 1)
+                resp_headers.append((hk.strip(), hv.strip()))
+
+        resp_body = parts[1] if len(parts) > 1 else b""
+        start_response(status_code, resp_headers)
+        return [resp_body]
+
+    start_response("200 OK", [("Content-Type", "text/html; charset=utf-8")])
+    return [HTML_PAGE.encode("utf-8")]
 
 
 class NOVAXServer(ThreadingHTTPServer):

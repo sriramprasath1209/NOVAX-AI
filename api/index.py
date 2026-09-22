@@ -12,10 +12,8 @@ os.environ.setdefault("VERCEL", "1")
 
 # Load environment configuration
 import src.config
-from src.web_app import NOVAXRequestHandler
+from src.web_app import NOVAXRequestHandler, wsgi_app
 
-# Export the handler and app for Vercel Serverless Function
-class handler(NOVAXRequestHandler):
-    pass
-
-app = handler
+# Export the standard WSGI app and handler for Vercel Serverless Functions
+app = wsgi_app
+handler = wsgi_app

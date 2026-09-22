@@ -9,11 +9,11 @@ if str(ROOT_DIR) not in sys.path:
 
 import src.config
 from src.assistant import Assistant
-from src.web_app import NOVAXRequestHandler
+from src.web_app import NOVAXRequestHandler, wsgi_app
 
-# Export top-level handler and app for Vercel Serverless Function runtime
+# Export standard WSGI app and handler for Vercel / serverless runtime
+app = wsgi_app
 handler = NOVAXRequestHandler
-app = handler
 
 
 if __name__ == "__main__":
