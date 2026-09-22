@@ -4702,23 +4702,8 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                     "session_id": session_id
                 }
 
-        # Resilient fallback to primary user if available
-        try:
-            with db.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT id, email, name FROM users ORDER BY created_at ASC LIMIT 1")
-                row = cursor.fetchone()
-                if row:
-                    return {
-                        "id": row["id"],
-                        "email": row["email"],
-                        "name": row["name"],
-                        "session_id": "fallback_session"
-                    }
-        except Exception:
-            pass
-
         return None
+
 
     def _get_request_path(self):
         raw_path = self.path or "/"
