@@ -1,0 +1,5 @@
+# Optional PDF document parsing support
+PyMuPDF>=1.23.0
+
+# Optional Ollama client support
+ollama>=0.4.0

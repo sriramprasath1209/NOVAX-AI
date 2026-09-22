@@ -4665,6 +4665,15 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
 
 class NOVAXRequestHandler(BaseHTTPRequestHandler):
+    _default_brain = None
+
+    @property
+    def brain(self):
+        if hasattr(self, "server") and hasattr(self.server, "brain") and self.server.brain:
+            return self.server.brain
+        if NOVAXRequestHandler._default_brain is None:
+            NOVAXRequestHandler._default_brain = Brain()
+        return NOVAXRequestHandler._default_brain
 
     def _get_authenticated_user(self):
         cookie_header = self.headers.get("Cookie", "")
@@ -4742,7 +4751,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             if not user:
                 self._send_json({"error": "Unauthorized"}, status=401)
                 return
-            memories = self.server.brain.memory.load_memory(user_id=user["id"])
+            memories = self.brain.memory.load_memory(user_id=user["id"])
             self._send_json(memories)
             return
 
@@ -4752,7 +4761,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": "Unauthorized"}, status=401)
                 return
             query = parse_qs(parsed.query).get("q", [""])[0]
-            results = self.server.brain.memory.search(query, user_id=user["id"])
+            results = self.brain.memory.search(query, user_id=user["id"])
             self._send_json(results)
             return
 
@@ -4904,7 +4913,7 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": "message is required"}, status=400)
                 return
 
-            response = self.server.brain.get_response(message, user_id=user["id"], user_name=user["name"], conversation_id=conv_id)
+            response = self.brain.get_response(message, user_id=user["id"], user_name=user["name"], conversation_id=conv_id)
             conv = db.get_conversation(conv_id, user["id"]) if conv_id else None
             self._send_json({
                 "reply": response,
@@ -4966,16 +4975,16 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
                 return
 
             if is_delete:
-                self.server.brain.memory.delete(category, key, user_id=user["id"])
+                self.brain.memory.delete(category, key, user_id=user["id"])
             else:
-                self.server.brain.memory.set(category, key, value, user_id=user["id"], source=source)
+                self.brain.memory.set(category, key, value, user_id=user["id"], source=source)
                 if category == "profile" and key == "name" and value:
                     try:
                         db.update_user(user["id"], name=value)
                     except Exception:
                         pass
 
-            updated = self.server.brain.memory.load_memory(user_id=user["id"])
+            updated = self.brain.memory.load_memory(user_id=user["id"])
             self._send_json({"success": True, "memory": updated})
             return
 
@@ -4985,18 +4994,18 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
             if not category or not key:
                 self._send_json({"error": "category and key required"}, status=400)
                 return
-            self.server.brain.memory.delete(category, key, user_id=user["id"])
-            updated = self.server.brain.memory.load_memory(user_id=user["id"])
+            self.brain.memory.delete(category, key, user_id=user["id"])
+            updated = self.brain.memory.load_memory(user_id=user["id"])
             self._send_json({"success": True, "memory": updated})
             return
 
         elif parsed.path == "/api/memory/clear_all":
-            self.server.brain.memory.clear_all(user_id=user["id"])
+            self.brain.memory.clear_all(user_id=user["id"])
             self._send_json({"success": True, "memory": {}})
             return
 
         elif parsed.path == "/api/clear":
-            self.server.brain.conversation.clear(user_id=user["id"])
+            self.brain.conversation.clear(user_id=user["id"])
             self._send_json({"success": True})
             return
 
@@ -5139,7 +5148,8 @@ class NOVAXServer(ThreadingHTTPServer):
         self.brain = Brain()
 
 
-def run_server(host="127.0.0.1", port=None):
+def run_server(host=None, port=None):
+    host = host or os.environ.get("HOST", "0.0.0.0")
     initial_port = port or int(os.environ.get("PORT", "8000"))
     max_tries = 10
     server = None

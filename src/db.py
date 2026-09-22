@@ -5,8 +5,14 @@ import json
 from pathlib import Path
 from contextlib import contextmanager
 
-DB_PATH = Path(__file__).resolve().parent.parent / "data" / "novax.db"
-OLD_MEMORY_PATH = Path(__file__).resolve().parent.parent / "data" / "memory.json"
+_default_db_dir = Path(__file__).resolve().parent.parent / "data"
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    _default_db_path = Path("/tmp/novax.db")
+else:
+    _default_db_path = _default_db_dir / "novax.db"
+
+DB_PATH = Path(os.environ.get("DB_PATH", os.environ.get("NOVAX_DB_PATH", str(_default_db_path))))
+OLD_MEMORY_PATH = _default_db_dir / "memory.json"
 
 class MemoryValue(str):
     def __new__(cls, value, source="USER", created_at=0, updated_at=0):
