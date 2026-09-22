@@ -4735,6 +4735,9 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
         elif path.startswith("/api/index"):
             path = path[len("/api/index"):] or "/"
 
+        if len(path) > 1 and path.endswith("/"):
+            path = path.rstrip("/")
+
         return path, parsed
 
     def do_GET(self):

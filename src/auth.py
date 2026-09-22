@@ -58,11 +58,14 @@ def login_user(email: str, password: str) -> tuple[dict | None, str | None]:
         return None, "Please enter both email and password."
 
     user = db.get_user_by_email(email)
-    if not user or not user.get("password_hash") or not user.get("salt"):
-        return None, "Invalid email or password."
+    if not user:
+        return None, "Account not found. Please click 'Create account' below to register."
+
+    if not user.get("password_hash") or not user.get("salt"):
+        return None, "Invalid credentials. If you previously used Google Sign-In, please sign in with Google."
 
     if not verify_password(password, user["password_hash"], user["salt"]):
-        return None, "Invalid email or password."
+        return None, "Incorrect password. Please try again."
 
     return user, None
 
