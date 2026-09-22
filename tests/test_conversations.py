@@ -17,9 +17,11 @@ class ConversationTests(unittest.TestCase):
         test_db = Database(self.db_path)
         auth.db = test_db
         import src.db
+        import src.memory
         import src.brain
         import src.conversation
         src.db.db = test_db
+        src.memory.db = test_db
         src.brain.db = test_db
         src.conversation.db = test_db
 

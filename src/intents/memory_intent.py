@@ -16,9 +16,30 @@ class MemoryIntent:
             self.brain.memory.set("user", "name", name, user_id=user_id, source="USER")
             return f"I'll remember that your name is {name}."
 
+        # 1b. "Remember my location is <location>" / "Remember my city is <city>"
+        elif message.startswith("remember my location is") or message.startswith("remember my city is") or message.startswith("remember my country is"):
+            if message.startswith("remember my city is"):
+                field = "city"
+                prefix_len = len("remember my city is")
+            elif message.startswith("remember my country is"):
+                field = "country"
+                prefix_len = len("remember my country is")
+            else:
+                field = "location"
+                prefix_len = len("remember my location is")
+
+            val = user_message[prefix_len:].strip()
+            if not val:
+                return f"Please tell me the {field} you want me to remember."
+
+            self.brain.memory.set("profile", field, val, user_id=user_id, source="USER")
+            self.brain.memory.set("user", field, val, user_id=user_id, source="USER")
+            return f"I'll remember that your {field} is **{val}**."
+
         # 2. "Remember that <key> is <value>"
-        elif message.startswith("remember that "):
-            content = user_message[len("remember that "):].strip()
+        elif message.startswith("remember that ") or message.startswith("remember my "):
+            prefix_len = len("remember that ") if message.startswith("remember that ") else len("remember my ")
+            content = user_message[prefix_len:].strip()
             if " is " in content:
                 parts = content.split(" is ", 1)
                 k = parts[0].strip()
@@ -37,6 +58,15 @@ class MemoryIntent:
                         cat = "education"
                     elif "job" in k_lower or "role" in k_lower or "work" in k_lower:
                         cat = "career"
+                    elif "location" in k_lower or "city" in k_lower or "country" in k_lower or "place" in k_lower or "residence" in k_lower or "hometown" in k_lower:
+                        cat = "profile"
+                        # Also synchronize to standard profile keys if matched
+                        if "city" in k_lower:
+                            self.brain.memory.set("profile", "city", v, user_id=user_id, source="USER")
+                            self.brain.memory.set("user", "city", v, user_id=user_id, source="USER")
+                        elif "location" in k_lower:
+                            self.brain.memory.set("profile", "location", v, user_id=user_id, source="USER")
+                            self.brain.memory.set("user", "location", v, user_id=user_id, source="USER")
 
                     self.brain.memory.set(cat, k, v, user_id=user_id, source="USER")
                     return f"I've saved that memory: **{k}** = *{v}* in your Memory Center."
