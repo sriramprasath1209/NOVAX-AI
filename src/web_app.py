@@ -4723,7 +4723,17 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
     def _get_request_path(self):
         raw_path = self.path or "/"
         parsed = urlparse(raw_path)
-        path = parsed.path or "/"
+        qs = parse_qs(parsed.query)
+
+        # If rewritten by serverless proxy like Vercel with __path__
+        if "__path__" in qs and qs["__path__"]:
+            target = qs["__path__"][0]
+            if not target.startswith("/"):
+                target = "/" + target
+            parsed_target = urlparse(target)
+            path = parsed_target.path or "/"
+        else:
+            path = parsed.path or "/"
 
         if path.startswith("/api/index.py"):
             path = path[len("/api/index.py"):] or "/"
@@ -4736,21 +4746,12 @@ class NOVAXRequestHandler(BaseHTTPRequestHandler):
         return path, parsed
 
     def do_GET(self):
-        if "debug_probe" in (self.path or ""):
-            path, parsed = self._get_request_path()
-            self._send_json({
-                "raw_path": self.path,
-                "resolved_path": path,
-                "headers": dict(self.headers)
-            })
-            return
-
         path, parsed = self._get_request_path()
 
         if path in ["/", "", "/index.html"]:
-
             self._send_html(HTML_PAGE)
             return
+
 
         elif path == "/assets/logo.svg":
             asset_path = os.path.join(os.path.dirname(__file__), "assets", "logo.svg")
